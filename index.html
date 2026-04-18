@@ -3,15 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>TokoKu 🛍️</title>
+<title>TokoKu - Manual Payment</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-<script
-  src="https://app.sandbox.midtrans.com/snap/snap.js"
-  data-client-key="Mid-client-aiQX-ZVF4eK63Lwr"
-  id="midtrans-script">
-</script>
 
 <style>
 :root {
@@ -45,7 +40,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 .hidden{display:none!important}
 
 /* LOADER */
-#app-loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity 0.5s ease}
+#app-loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity 0.5s ease;z-index:10000}
 .loader-logo{font-family:var(--font-display);font-size:52px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:breathe 1.8s ease infinite}
 .loader-ring{width:42px;height:42px;border:3px solid rgba(255,107,53,0.15);border-top:3px solid var(--accent);border-radius:50%;animation:spin 0.75s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -64,7 +59,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity var(--transition)}
 .modal-overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--bg-card);border:1px solid var(--border-strong);border-radius:24px;padding:32px;width:100%;max-width:480px;transform:translateY(24px) scale(0.96);transition:transform var(--transition);max-height:90vh;overflow-y:auto;position:relative}
+.modal{background:var(--bg-card);border:1px solid var(--border-strong);border-radius:24px;padding:32px;width:100%;max-width:500px;transform:translateY(24px) scale(0.96);transition:transform var(--transition);max-height:90vh;overflow-y:auto;position:relative}
 .modal-overlay.open .modal{transform:translateY(0) scale(1)}
 .modal-title{font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:22px}
 .modal-close{position:absolute;top:16px;right:16px;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-muted);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
@@ -77,7 +72,10 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 .btn-secondary{background:var(--bg-elevated);border:1px solid var(--border-strong);color:var(--text)}
 .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
 .btn-danger{background:rgba(255,77,109,0.1);border:1px solid var(--danger);color:var(--danger)}
+.btn-danger:hover{background:rgba(255,77,109,0.2)}
 .btn-success{background:rgba(34,212,154,0.1);border:1px solid var(--success);color:var(--success)}
+.btn-success:hover{background:rgba(34,212,154,0.2)}
+.btn-warning{background:rgba(255,195,0,0.1);border:1px solid var(--warning);color:var(--warning)}
 .btn-ghost{background:transparent;color:var(--text-muted)}
 .btn-ghost:hover{color:var(--text)}
 .btn-sm{padding:8px 14px;font-size:13px}
@@ -87,28 +85,35 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-hei
 /* FORMS */
 .form-group{margin-bottom:16px}
 .form-label{display:block;font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.07em}
+.form-label.required::after{content:'*';color:var(--danger);margin-left:4px}
 .form-input{width:100%;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 16px;color:var(--text);font-family:var(--font-body);font-size:15px;transition:all var(--transition);outline:none}
 .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
 .form-input::placeholder{color:var(--text-dim)}
 textarea.form-input{resize:vertical;min-height:88px}
+select.form-input{cursor:pointer}
+
+/* QTY STYLES */
+.qty-row{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.qty-wrap{display:flex;align-items:center;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.qty-btn{width:42px;height:42px;background:var(--bg-elevated);border:none;color:var(--text);cursor:pointer;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background var(--transition)}
+.qty-btn:hover{background:var(--border)}
+.qty-num{width:52px;height:42px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+.order-total-display{font-family:var(--font-display);font-size:30px;font-weight:800;color:var(--accent);text-align:center;padding:16px;background:var(--accent-glow);border:1px solid rgba(255,107,53,0.18);border-radius:12px;margin-bottom:14px}
 
 /* BADGES */
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
 .badge-pending{background:rgba(255,195,0,0.1);color:var(--warning);border:1px solid rgba(255,195,0,0.3)}
-.badge-processing{background:rgba(76,201,240,0.1);color:var(--info);border:1px solid rgba(76,201,240,0.3)}
-.badge-accepted{background:rgba(34,212,154,0.1);color:var(--success);border:1px solid rgba(34,212,154,0.3)}
+.badge-paid{background:rgba(34,212,154,0.1);color:var(--success);border:1px solid rgba(34,212,154,0.3)}
 .badge-rejected{background:rgba(255,77,109,0.1);color:var(--danger);border:1px solid rgba(255,77,109,0.3)}
 .badge-completed{background:rgba(34,212,154,0.18);color:var(--success);border:1px solid var(--success)}
-.badge-cancelled{background:rgba(125,122,136,0.1);color:var(--text-muted);border:1px solid var(--border)}
 
 /* NAVBAR */
 #navbar{position:sticky;top:0;z-index:100;background:rgba(7,7,13,0.85);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:0 28px;height:64px;display:flex;align-items:center;justify-content:space-between}
-.nav-logo{font-family:var(--font-display);font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;cursor:pointer;text-decoration:none;letter-spacing:-0.3px}
+.nav-logo{font-family:var(--font-display);font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;cursor:pointer}
 .nav-actions{display:flex;align-items:center;gap:8px}
 .nav-pill{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:99px;cursor:pointer;transition:all var(--transition)}
 .nav-pill:hover{border-color:var(--border-strong)}
-.nav-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#07070d;overflow:hidden;flex-shrink:0}
-.nav-avatar img{width:100%;height:100%;object-fit:cover}
+.nav-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#07070d}
 .nav-name{font-size:13px;font-weight:500;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .icon-btn{position:relative;background:var(--bg-elevated);border:1px solid var(--border);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all var(--transition)}
 .icon-btn:hover{border-color:var(--accent)}
@@ -121,74 +126,64 @@ textarea.form-input{resize:vertical;min-height:88px}
 /* AUTH PAGE */
 #page-auth{display:none;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:radial-gradient(ellipse at 60% 20%,rgba(255,107,53,0.07) 0%,transparent 55%)}
 #page-auth.active{display:flex}
-.auth-card{background:var(--bg-card);border:1px solid var(--border-strong);border-radius:28px;padding:48px 40px;width:100%;max-width:400px;text-align:center;position:relative;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.5)}
+.auth-card{background:var(--bg-card);border:1px solid var(--border-strong);border-radius:28px;padding:48px 40px;width:100%;max-width:400px;text-align:center;position:relative;overflow:hidden}
 .auth-card::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:240px;height:240px;background:radial-gradient(circle,rgba(255,107,53,0.1),transparent 65%);border-radius:50%;pointer-events:none}
 .auth-logo{font-size:60px;display:block;margin-bottom:16px;animation:float 3s ease-in-out infinite;position:relative;z-index:1}
-.auth-title{font-family:var(--font-display);font-size:34px;font-weight:800;margin-bottom:6px;letter-spacing:-0.5px}
+.auth-title{font-family:var(--font-display);font-size:34px;font-weight:800;margin-bottom:6px}
 .auth-sub{color:var(--text-muted);margin-bottom:32px;font-size:14px}
 .auth-field{position:relative;margin-bottom:14px;text-align:left}
-.auth-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;z-index:1}
-.auth-input{width:100%;background:var(--bg-elevated);border:1.5px solid var(--border);border-radius:12px;padding:15px 16px 15px 46px;color:var(--text);font-family:var(--font-body);font-size:15px;outline:none;transition:all var(--transition)}
-.auth-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);background:rgba(30,30,50,0.9)}
-.auth-input::placeholder{color:var(--text-dim)}
-.auth-btn{width:100%;padding:16px;font-size:15px;font-weight:700;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#07070d;border:none;cursor:pointer;font-family:var(--font-body);transition:all var(--transition);box-shadow:0 4px 22px rgba(255,107,53,0.32);letter-spacing:0.02em;margin-top:4px}
+.auth-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:16px;z-index:1}
+.auth-input{width:100%;background:var(--bg-elevated);border:1.5px solid var(--border);border-radius:12px;padding:15px 16px 15px 46px;color:var(--text);font-size:15px;outline:none;transition:all var(--transition)}
+.auth-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.auth-btn{width:100%;padding:16px;font-size:15px;font-weight:700;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#07070d;border:none;cursor:pointer;transition:all var(--transition);margin-top:4px}
 .auth-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,107,53,0.48)}
-.auth-btn:active{transform:translateY(0)}
-.auth-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
-.auth-note{margin-top:20px;font-size:13px;color:var(--text-muted);background:var(--bg-elevated);border-radius:10px;padding:12px 14px;border:1px solid var(--border);text-align:left;line-height:1.6}
+.auth-note{margin-top:20px;font-size:13px;color:var(--text-muted);background:var(--bg-elevated);border-radius:10px;padding:12px 14px;border:1px solid var(--border);text-align:left}
 
 /* HERO */
-.store-hero{background:linear-gradient(135deg,var(--bg-card),rgba(255,107,53,0.03));border:1px solid var(--border);border-radius:24px;padding:48px 44px;margin-bottom:32px;display:flex;align-items:center;justify-content:space-between;overflow:hidden;position:relative}
-.store-hero::after{content:'';position:absolute;right:-60px;top:-60px;width:280px;height:280px;background:radial-gradient(circle,rgba(255,107,53,0.08),transparent 65%);border-radius:50%;pointer-events:none}
-.hero-tag{display:inline-block;background:var(--accent-glow);border:1px solid rgba(255,107,53,0.3);color:var(--accent);font-size:11px;font-weight:700;padding:5px 12px;border-radius:99px;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px}
-.hero-h1{font-family:var(--font-display);font-size:clamp(26px,3.5vw,50px);font-weight:800;line-height:1.06;margin-bottom:12px;letter-spacing:-1px}
+.store-hero{background:linear-gradient(135deg,var(--bg-card),rgba(255,107,53,0.03));border:1px solid var(--border);border-radius:24px;padding:48px 44px;margin-bottom:32px;display:flex;align-items:center;justify-content:space-between;position:relative}
+.store-hero::after{content:'';position:absolute;right:-60px;top:-60px;width:280px;height:280px;background:radial-gradient(circle,rgba(255,107,53,0.08),transparent 65%);border-radius:50%}
+.hero-tag{display:inline-block;background:var(--accent-glow);border:1px solid rgba(255,107,53,0.3);color:var(--accent);font-size:11px;font-weight:700;padding:5px 12px;border-radius:99px;margin-bottom:14px}
+.hero-h1{font-family:var(--font-display);font-size:clamp(26px,3.5vw,50px);font-weight:800;line-height:1.06;margin-bottom:12px}
 .hero-h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hero-p{color:var(--text-muted);font-size:15px;max-width:360px}
-.hero-emo{font-size:88px;line-height:1;position:relative;z-index:1;animation:float 4s ease-in-out infinite;flex-shrink:0}
+.hero-emo{font-size:88px;animation:float 4s ease-in-out infinite;flex-shrink:0}
 
-/* SEARCH */
-.search-bar{display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:18px;transition:border-color var(--transition)}
+/* SEARCH & CATEGORY */
+.search-bar{display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:18px}
 .search-bar:focus-within{border-color:var(--accent)}
-.search-bar input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--font-body);font-size:15px}
-.search-bar input::placeholder{color:var(--text-dim)}
+.search-bar input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:15px}
 .cat-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
-.cat-tab{padding:8px 16px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:13px;font-weight:500;transition:all var(--transition);font-family:var(--font-body)}
+.cat-tab{padding:8px 16px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:13px;font-weight:500;transition:all var(--transition)}
 .cat-tab:hover{border-color:var(--border-strong);color:var(--text)}
 .cat-tab.active{background:var(--accent);color:#07070d;border-color:var(--accent);font-weight:700}
 
 /* PRODUCT GRID */
-.section-title{font-family:var(--font-display);font-size:20px;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:14px;letter-spacing:-0.3px}
+.section-title{font-family:var(--font-display);font-size:20px;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:14px}
 .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
 .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
 .product-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;overflow:hidden;cursor:pointer;transition:all var(--transition)}
 .product-card:hover{border-color:rgba(255,107,53,0.4);transform:translateY(-5px);box-shadow:0 20px 50px rgba(0,0,0,0.35)}
-.prod-img{width:100%;aspect-ratio:1;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:50px;overflow:hidden;position:relative}
+.prod-img{width:100%;aspect-ratio:1;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:50px;position:relative}
 .prod-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.35s ease}
 .product-card:hover .prod-img img{transform:scale(1.06)}
-.prod-sold-out{position:absolute;inset:0;background:rgba(7,7,13,0.65);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--danger);text-transform:uppercase;letter-spacing:0.06em;backdrop-filter:blur(2px)}
+.prod-sold-out{position:absolute;inset:0;background:rgba(7,7,13,0.65);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--danger);backdrop-filter:blur(2px)}
 .prod-info{padding:14px}
 .prod-name{font-weight:700;font-size:14px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.prod-cat{font-size:11px;color:var(--text-dim);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em}
+.prod-cat{font-size:11px;color:var(--text-dim);margin-bottom:10px}
 .prod-footer{display:flex;align-items:center;justify-content:space-between}
 .prod-price{font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--accent)}
-.prod-stock{font-size:11px;color:var(--text-dim);margin-top:1px}
-.quick-add{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all var(--transition);box-shadow:0 3px 10px rgba(255,107,53,0.28)}
+.prod-stock{font-size:11px;color:var(--text-dim)}
+.quick-add{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
 .quick-add:hover{transform:scale(1.14)}
-.quick-add:disabled{opacity:0.3;cursor:not-allowed;transform:none;box-shadow:none}
+.quick-add:disabled{opacity:0.3;cursor:not-allowed}
 
-/* ORDER MODAL */
+/* ORDER PREVIEW */
 .order-preview{display:flex;gap:16px;align-items:center;padding:14px;background:var(--bg-elevated);border-radius:12px;margin-bottom:20px}
 .order-preview-img{width:68px;height:68px;border-radius:12px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:26px;overflow:hidden;flex-shrink:0}
 .order-preview-img img{width:100%;height:100%;object-fit:cover}
-.qty-row{display:flex;align-items:center;gap:14px;margin-bottom:16px}
-.qty-wrap{display:flex;align-items:center;border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.qty-btn{width:42px;height:42px;background:var(--bg-elevated);border:none;color:var(--text);cursor:pointer;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background var(--transition)}
-.qty-btn:hover{background:var(--border)}
-.qty-num{width:52px;height:42px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;border-left:1px solid var(--border);border-right:1px solid var(--border)}
-.order-total-display{font-family:var(--font-display);font-size:30px;font-weight:800;color:var(--accent);text-align:center;padding:16px;background:var(--accent-glow);border:1px solid rgba(255,107,53,0.18);border-radius:12px;margin-bottom:14px}
 
-/* CART */
-#cart-sidebar{position:fixed;right:0;top:0;bottom:0;width:385px;max-width:100vw;background:var(--bg-card);border-left:1px solid var(--border-strong);z-index:500;transform:translateX(100%);transition:transform var(--transition);display:flex;flex-direction:column}
+/* CART SIDEBAR */
+#cart-sidebar{position:fixed;right:0;top:0;bottom:0;width:400px;max-width:100vw;background:var(--bg-card);border-left:1px solid var(--border-strong);z-index:500;transform:translateX(100%);transition:transform var(--transition);display:flex;flex-direction:column}
 #cart-sidebar.open{transform:translateX(0)}
 .cart-head{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .cart-title{font-family:var(--font-display);font-size:19px;font-weight:800}
@@ -198,51 +193,49 @@ textarea.form-input{resize:vertical;min-height:88px}
 .cart-item-img img{width:100%;height:100%;object-fit:cover}
 .cart-item-info{flex:1;min-width:0}
 .cart-item-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cart-item-price{font-size:13px;color:var(--accent);font-weight:600;margin-top:2px}
+.cart-item-price{font-size:13px;color:var(--accent);font-weight:600}
 .cart-item-sub{font-size:12px;color:var(--text-muted)}
-.cart-remove{cursor:pointer;color:var(--text-dim);font-size:15px;padding:4px;transition:color var(--transition);flex-shrink:0}
+.cart-remove{cursor:pointer;color:var(--text-dim);font-size:15px;padding:4px}
 .cart-remove:hover{color:var(--danger)}
 .cart-foot{padding:18px 22px;border-top:1px solid var(--border)}
 .cart-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.cart-total-lbl{color:var(--text-muted);font-size:14px}
 .cart-total-amt{font-family:var(--font-display);font-size:24px;font-weight:800;color:var(--accent)}
 .cart-overlay{position:fixed;inset:0;z-index:499;background:rgba(0,0,0,0.55);backdrop-filter:blur(5px);display:none}
 .cart-overlay.open{display:block}
 
 /* ORDERS */
 .orders-list{display:flex;flex-direction:column;gap:12px}
-.order-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:18px 22px;transition:border-color var(--transition)}
+.order-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:18px 22px}
 .order-card:hover{border-color:var(--border-strong)}
-.order-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.order-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
 .order-num{font-family:var(--font-display);font-weight:800;font-size:15px}
 .order-date{font-size:12px;color:var(--text-muted)}
 .order-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .order-chip{background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:3px 9px;font-size:12px}
-.order-foot{display:flex;align-items:center;justify-content:space-between}
+.order-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:10px}
 .order-amt{font-weight:800;font-size:17px;color:var(--accent)}
 
 /* ADMIN */
 .admin-layout{display:grid;grid-template-columns:200px 1fr;gap:20px;min-height:calc(100vh - 64px)}
 .admin-sidebar{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:20px 12px;height:fit-content;position:sticky;top:84px}
-.admin-nav-item{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;font-size:14px;font-weight:500;color:var(--text-muted);transition:all var(--transition);margin-bottom:3px;border:none;background:transparent;width:100%;text-align:left;font-family:var(--font-body)}
+.admin-nav-item{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;font-size:14px;font-weight:500;color:var(--text-muted);transition:all var(--transition);margin-bottom:3px;border:none;background:transparent;width:100%;text-align:left}
 .admin-nav-item:hover{background:var(--bg-elevated);color:var(--text)}
 .admin-nav-item.active{background:var(--accent-glow);color:var(--accent);font-weight:600}
 .admin-tab{display:none}
 .admin-tab.active{display:block}
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;margin-bottom:26px}
-.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:18px;position:relative;overflow:hidden}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:18px;position:relative}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-.stat-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;font-weight:600}
+.stat-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;font-weight:600}
 .stat-value{font-family:var(--font-display);font-size:28px;font-weight:800}
 .upload-area{border:2px dashed var(--border-strong);border-radius:var(--radius);padding:28px;text-align:center;cursor:pointer;transition:all var(--transition);position:relative}
 .upload-area:hover{border-color:var(--accent);background:var(--accent-glow)}
 .upload-area input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
 .upload-preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-top:14px}
-.admin-order-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:18px 22px;margin-bottom:12px;transition:border-color var(--transition)}
-.admin-order-card:hover{border-color:var(--border-strong)}
+.admin-order-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:18px 22px;margin-bottom:12px}
 .order-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 .product-table{width:100%;border-collapse:collapse}
-.product-table th{text-align:left;padding:10px 12px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)}
+.product-table th{text-align:left;padding:10px 12px;font-size:11px;font-weight:700;color:var(--text-muted);border-bottom:1px solid var(--border)}
 .product-table td{padding:12px 12px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle}
 .product-table tr:hover td{background:var(--bg-elevated)}
 .product-thumb{width:40px;height:40px;border-radius:8px;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:17px;overflow:hidden}
@@ -250,6 +243,16 @@ textarea.form-input{resize:vertical;min-height:88px}
 .empty-state{text-align:center;padding:56px 24px;color:var(--text-muted)}
 .empty-state .emo{font-size:56px;display:block;margin-bottom:12px}
 .empty-state h3{font-size:17px;font-weight:700;margin-bottom:6px;color:var(--text)}
+.img-zoom{cursor:pointer;transition:transform 0.2s}
+.img-zoom:hover{transform:scale(1.05)}
+
+/* BANK INFO */
+.bank-info{background:var(--bg-elevated);border-radius:12px;padding:16px;margin-bottom:20px}
+.bank-info h4{font-size:14px;margin-bottom:12px;color:var(--accent)}
+.bank-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.bank-item:last-child{border-bottom:none}
+.bank-name{font-weight:600}
+.bank-number{font-family:monospace;font-size:13px}
 
 @media(max-width:768px){
   .admin-layout{grid-template-columns:1fr}
@@ -291,15 +294,39 @@ textarea.form-input{resize:vertical;min-height:88px}
       <span class="cart-total-lbl">Total</span>
       <span class="cart-total-amt" id="cart-total-display">Rp 0</span>
     </div>
-    <div class="form-group" style="margin-bottom:10px">
-      <label class="form-label">Alamat Pengiriman</label>
-      <textarea class="form-input" id="cart-address" rows="2" placeholder="Masukkan alamat lengkap..."></textarea>
+    <button class="btn btn-primary btn-full" onclick="App.openCheckoutModal()">💳 Lanjut ke Pembayaran</button>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal" style="max-width:550px">
+    <button class="modal-close" onclick="App.closeModal('checkout-modal')">✕</button>
+    <h2 class="modal-title">💳 Detail Pesanan</h2>
+    
+    <div class="bank-info">
+      <h4>🏦 Transfer ke Rekening:</h4>
+      <div class="bank-item"><span class="bank-name">BCA</span><span class="bank-number">123 456 7890</span><span>a.n TokoKu</span></div>
+      <div class="bank-item"><span class="bank-name">BRI</span><span class="bank-number">9876 5432 1098</span><span>a.n TokoKu</span></div>
+      <div class="bank-item"><span class="bank-name">MANDIRI</span><span class="bank-number">123-00-1234567-8</span><span>a.n TokoKu</span></div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:12px">⚠️ Transfer sesuai total belanja, lalu upload bukti transfer</p>
     </div>
-    <div class="form-group" style="margin-bottom:12px">
-      <label class="form-label">Catatan (opsional)</label>
-      <input class="form-input" id="cart-notes" placeholder="Catatan pesanan..."/>
+
+    <div class="form-group"><label class="form-label required">Nama Lengkap</label><input class="form-input" id="checkout-name" placeholder="Nama lengkap penerima" /></div>
+    <div class="form-group"><label class="form-label required">Nomor Telepon</label><input class="form-input" id="checkout-phone" placeholder="081234567890" type="tel" /></div>
+    <div class="form-group"><label class="form-label required">Alamat Lengkap</label><textarea class="form-input" id="checkout-address" rows="3" placeholder="Alamat lengkap, RT/RW, Kecamatan, Kabupaten/Kota, Kode Pos"></textarea></div>
+    <div class="form-group"><label class="form-label required">Metode Transfer</label><select class="form-input" id="checkout-bank"><option value="BCA">BCA</option><option value="BRI">BRI</option><option value="MANDIRI">MANDIRI</option></select></div>
+    <div class="form-group"><label class="form-label required">Upload Bukti Transfer</label>
+      <div class="upload-area" style="padding:20px">
+        <input type="file" id="payment-proof" accept="image/*" onchange="App.previewPaymentProof(this)" />
+        <div id="proof-placeholder">📷<br><span style="font-size:14px">Klik untuk upload bukti transfer</span><br><span style="font-size:12px">JPG, PNG, WEBP · Max 5MB</span></div>
+        <img id="proof-preview" class="upload-preview hidden" alt="preview" />
+      </div>
     </div>
-    <button class="btn btn-primary btn-full" id="checkout-btn" onclick="App.checkout()">💳 Buat Pesanan</button>
+    <div class="form-group"><label class="form-label">Catatan (opsional)</label><input class="form-input" id="checkout-notes" placeholder="Catatan untuk penjual" /></div>
+    
+    <div class="order-total-display" style="font-size:24px;margin:10px 0" id="checkout-total">Rp 0</div>
+    <button class="btn btn-primary btn-full" onclick="App.submitOrder()">📤 Kirim Pesanan</button>
   </div>
 </div>
 
@@ -307,25 +334,11 @@ textarea.form-input{resize:vertical;min-height:88px}
 <nav id="navbar" class="hidden">
   <a class="nav-logo" onclick="App.navigate('store')">🛍️ TokoKu</a>
   <div class="nav-actions">
-    <button class="btn btn-ghost btn-sm hidden" id="nav-back-btn" onclick="App.goBack()">← Kembali</button>
-
-    <span id="nav-admin-btn" class="hidden">
-      <button class="btn btn-secondary btn-sm" onclick="App.navigate('admin')">⚙️ Admin</button>
-    </span>
-
-    <button class="btn btn-ghost btn-sm" onclick="App.navigate('orders')">📦 Pesanan</button>
-
-    <div class="icon-btn" onclick="App.openCart()">
-      🛒
-      <span class="cart-badge hidden" id="cart-count">0</span>
-    </div>
-
-    <div class="nav-pill" onclick="App.showUserMenu()">
-      <div class="nav-avatar" id="nav-avatar">?</div>
-      <span class="nav-name" id="nav-name">User</span>
-    </div>
-
-    <button class="btn btn-ghost btn-sm" onclick="App.signOut()" title="Keluar">Keluar</button>
+    <span id="nav-admin-btn" class="hidden"><button class="btn btn-secondary btn-sm" onclick="App.navigate('admin')">⚙️ Admin</button></span>
+    <button class="btn btn-ghost btn-sm" onclick="App.navigate('orders')">📦 Pesanan Saya</button>
+    <div class="icon-btn" onclick="App.openCart()">🛒<span class="cart-badge hidden" id="cart-count">0</span></div>
+    <div class="nav-pill" onclick="App.showUserMenu()"><div class="nav-avatar" id="nav-avatar">?</div><span class="nav-name" id="nav-name">User</span></div>
+    <button class="btn btn-ghost btn-sm" onclick="App.signOut()">Keluar</button>
   </div>
 </nav>
 
@@ -335,42 +348,27 @@ textarea.form-input{resize:vertical;min-height:88px}
     <span class="auth-logo">🛍️</span>
     <h1 class="auth-title">TokoKu</h1>
     <p class="auth-sub">Masukkan email untuk mulai belanja</p>
-    <div class="auth-field">
-      <span class="auth-icon">📧</span>
-      <input type="email" class="auth-input" id="email-input" placeholder="email@kamu.com" onkeydown="if(event.key==='Enter')App.loginEmail()"/>
-    </div>
-  <button class="auth-btn" id="login-btn" onclick="App.loginEmail()">Masuk →</button>
-
-    <div class="auth-note" style="margin-top:18px">
-      Tidak perlu password. Masukkan email → langsung masuk. Akun baru dibuat otomatis.
-    </div>
+    <div class="auth-field"><span class="auth-icon">📧</span><input type="email" class="auth-input" id="email-input" placeholder="email@kamu.com" onkeydown="if(event.key==='Enter')App.loginEmail()"/></div>
+    <button class="auth-btn" id="login-btn" onclick="App.loginEmail()">Masuk →</button>
+    <div class="auth-note">Tidak perlu password. Masukkan email → langsung masuk. Akun baru dibuat otomatis.</div>
   </div>
 </div>
 
 <!-- STORE PAGE -->
 <div id="page-store" class="page">
   <div class="store-hero">
-    <div class="hero-text">
-      <div class="hero-tag">✨ Belanja Sekarang</div>
-      <h1 class="hero-h1">Belanja Lebih<br><span>Cerdas & Hemat</span></h1>
-      <p class="hero-p">Produk pilihan terbaik dengan harga terjangkau. Pesan sekarang!</p>
-    </div>
+    <div class="hero-text"><div class="hero-tag">✨ Belanja Sekarang</div><h1 class="hero-h1">Belanja Lebih<br><span>Cerdas & Hemat</span></h1><p class="hero-p">Produk pilihan terbaik dengan harga terjangkau. Pesan sekarang!</p></div>
     <div class="hero-emo">🛍️</div>
   </div>
-  <div class="search-bar">
-    <span style="font-size:16px;color:var(--text-dim)">🔍</span>
-    <input type="text" id="search-input" placeholder="Cari produk..." oninput="App.filterProducts()"/>
-  </div>
-  <div class="cat-tabs" id="category-tabs">
-    <button class="cat-tab active" onclick="App.filterCategory('semua',this)">Semua</button>
-  </div>
+  <div class="search-bar"><span>🔍</span><input type="text" id="search-input" placeholder="Cari produk..." oninput="App.filterProducts()"/></div>
+  <div class="cat-tabs" id="category-tabs"><button class="cat-tab active" onclick="App.filterCategory('semua',this)">Semua</button></div>
   <div class="section-title">Produk</div>
   <div class="products-grid" id="products-grid"></div>
 </div>
 
 <!-- ORDERS PAGE -->
 <div id="page-orders" class="page">
-  <div class="section-title">📦 Pesanan Saya</div>
+  <div class="section-title">📦 History Pesanan Saya</div>
   <div class="orders-list" id="user-orders-list"></div>
 </div>
 
@@ -382,7 +380,7 @@ textarea.form-input{resize:vertical;min-height:88px}
       <button class="admin-nav-item active" onclick="App.adminTab('dashboard',this)">📊 Dashboard</button>
       <button class="admin-nav-item" onclick="App.adminTab('products',this)">📦 Produk</button>
       <button class="admin-nav-item" onclick="App.adminTab('add-product',this)">➕ Tambah Produk</button>
-      <button class="admin-nav-item" onclick="App.adminTab('orders',this)">🛒 Pesanan</button>
+      <button class="admin-nav-item" onclick="App.adminTab('orders',this)">🛒 Pesanan Masuk</button>
     </aside>
     <div>
       <div id="admin-tab-dashboard" class="admin-tab active">
@@ -393,36 +391,18 @@ textarea.form-input{resize:vertical;min-height:88px}
       </div>
       <div id="admin-tab-products" class="admin-tab">
         <div class="section-title">📦 Daftar Produk</div>
-        <div style="overflow-x:auto">
-          <table class="product-table">
-            <thead><tr><th>Foto</th><th>Nama</th><th>Harga</th><th>Stok</th><th>Kategori</th><th>Status</th><th>Aksi</th></tr></thead>
-            <tbody id="admin-products-tbody"></tbody>
-          </table>
-        </div>
+        <div style="overflow-x:auto"><table class="product-table"><thead><tr><th>Foto</th><th>Nama</th><th>Harga</th><th>Stok</th><th>Kategori</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="admin-products-tbody"></tbody></table></div>
       </div>
       <div id="admin-tab-add-product" class="admin-tab">
         <div class="section-title" id="add-product-title">➕ Tambah Produk</div>
         <div style="max-width:520px">
-          <div class="form-group">
-            <label class="form-label">Foto Produk</label>
-            <div class="upload-area">
-              <input type="file" id="product-image-input" accept="image/*" onchange="App.previewImage(this)"/>
-              <div id="upload-placeholder">📷<br><span style="font-size:14px;color:var(--text-muted)">Klik atau drag foto ke sini</span><br><span style="font-size:12px;color:var(--text-dim)">JPG, PNG, WEBP · Max 5MB</span></div>
-              <img id="upload-preview" class="upload-preview hidden" alt="preview"/>
-            </div>
-          </div>
+          <div class="form-group"><label class="form-label">Foto Produk</label><div class="upload-area"><input type="file" id="product-image-input" accept="image/*" onchange="App.previewProductImage(this)"/><div id="upload-placeholder">📷<br><span>Klik untuk upload foto</span></div><img id="upload-preview" class="upload-preview hidden" alt="preview"/></div></div>
           <div class="form-group"><label class="form-label">Nama Produk</label><input class="form-input" id="prod-name" placeholder="Nama produk..."/></div>
           <div class="form-group"><label class="form-label">Deskripsi</label><textarea class="form-input" id="prod-desc" placeholder="Deskripsi singkat..."></textarea></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="form-group"><label class="form-label">Harga (Rp)</label><input class="form-input" id="prod-price" type="number" placeholder="50000"/></div>
-            <div class="form-group"><label class="form-label">Stok</label><input class="form-input" id="prod-stock" type="number" placeholder="100"/></div>
-          </div>
-          <div class="form-group"><label class="form-label">Kategori</label><input class="form-input" id="prod-category" placeholder="elektronik, fashion, dll..."/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="form-group"><label class="form-label">Harga (Rp)</label><input class="form-input" id="prod-price" type="number" placeholder="50000"/></div><div class="form-group"><label class="form-label">Stok</label><input class="form-input" id="prod-stock" type="number" placeholder="100"/></div></div>
+          <div class="form-group"><label class="form-label">Kategori</label><input class="form-input" id="prod-category" placeholder="fashion, elektronik, dll..."/></div>
           <input type="hidden" id="editing-product-id" value=""/>
-          <div style="display:flex;gap:10px">
-            <button class="btn btn-primary" onclick="App.saveProduct()" id="save-product-btn">💾 Simpan</button>
-            <button class="btn btn-ghost" onclick="App.resetProductForm()">Reset</button>
-          </div>
+          <div style="display:flex;gap:10px"><button class="btn btn-primary" onclick="App.saveProduct()" id="save-product-btn">💾 Simpan</button><button class="btn btn-ghost" onclick="App.resetProductForm()">Reset</button></div>
         </div>
       </div>
       <div id="admin-tab-orders" class="admin-tab">
@@ -430,8 +410,7 @@ textarea.form-input{resize:vertical;min-height:88px}
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px" id="order-filter-tabs">
           <button class="cat-tab active" onclick="App.filterAdminOrders('all',this)">Semua</button>
           <button class="cat-tab" onclick="App.filterAdminOrders('pending',this)">Menunggu</button>
-          <button class="cat-tab" onclick="App.filterAdminOrders('processing',this)">Diproses</button>
-          <button class="cat-tab" onclick="App.filterAdminOrders('accepted',this)">Diterima</button>
+          <button class="cat-tab" onclick="App.filterAdminOrders('paid',this)">Dibayar</button>
           <button class="cat-tab" onclick="App.filterAdminOrders('rejected',this)">Ditolak</button>
           <button class="cat-tab" onclick="App.filterAdminOrders('completed',this)">Selesai</button>
         </div>
@@ -441,34 +420,23 @@ textarea.form-input{resize:vertical;min-height:88px}
   </div>
 </div>
 
-<!-- ORDER MODAL -->
+<!-- ORDER MODAL (untuk quantity) -->
 <div class="modal-overlay" id="order-modal">
   <div class="modal">
     <button class="modal-close" onclick="App.closeModal('order-modal')">✕</button>
     <h2 class="modal-title">🛒 Pesan Produk</h2>
-    <div class="order-preview">
-      <div class="order-preview-img" id="modal-product-img">📦</div>
-      <div>
-        <div style="font-weight:800;font-size:16px;font-family:var(--font-display)" id="modal-product-name">-</div>
-        <div style="color:var(--text-muted);font-size:13px;margin:2px 0" id="modal-product-category">-</div>
-        <div style="color:var(--accent);font-weight:800;font-size:18px" id="modal-product-price">-</div>
-        <div style="color:var(--text-dim);font-size:12px;margin-top:2px" id="modal-product-stock">-</div>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Jumlah</label>
-      <div class="qty-row">
-        <div class="qty-wrap">
-          <button class="qty-btn" onclick="App.changeQty(-1)">−</button>
-          <div class="qty-num" id="modal-qty">1</div>
-          <button class="qty-btn" onclick="App.changeQty(1)">+</button>
-        </div>
-        <span style="font-size:13px;color:var(--text-muted)" id="modal-qty-info">tersisa: -</span>
-      </div>
-    </div>
+    <div class="order-preview"><div class="order-preview-img" id="modal-product-img">📦</div><div><div style="font-weight:800;font-size:16px" id="modal-product-name">-</div><div style="color:var(--text-muted);font-size:13px" id="modal-product-category">-</div><div style="color:var(--accent);font-weight:800;font-size:18px" id="modal-product-price">-</div><div style="color:var(--text-dim);font-size:12px" id="modal-product-stock">-</div></div></div>
+    <div class="form-group"><label class="form-label">Jumlah</label><div class="qty-row"><div class="qty-wrap"><button class="qty-btn" onclick="App.changeQty(-1)">−</button><div class="qty-num" id="modal-qty">1</div><button class="qty-btn" onclick="App.changeQty(1)">+</button></div><span style="font-size:13px;color:var(--text-muted)" id="modal-qty-info">tersisa: -</span></div></div>
     <div class="order-total-display" id="modal-total">Rp 0</div>
     <button class="btn btn-primary btn-full" onclick="App.addToCart()">🛒 Tambah ke Keranjang</button>
-    <button class="btn btn-secondary btn-full" style="margin-top:8px" onclick="App.buyNow()">⚡ Beli Langsung</button>
+  </div>
+</div>
+
+<!-- IMAGE ZOOM MODAL -->
+<div class="modal-overlay" id="image-modal">
+  <div class="modal" style="max-width:90vw;text-align:center">
+    <button class="modal-close" onclick="App.closeModal('image-modal')">✕</button>
+    <img id="zoom-image" src="" style="max-width:100%;max-height:70vh;border-radius:12px" alt="zoom"/>
   </div>
 </div>
 
@@ -479,10 +447,6 @@ const CONFIG = {
   SUPABASE_URL: 'https://vtozhwkvhtjfytmqdxkf.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_6eb_n7WUi2AZascv7bnwNQ_D75nSZsf',
   ADMIN_EMAIL: 'raykenzienazaru@gmail.com',
-
-  MIDTRANS_CLIENT_KEY: 'Mid-client-aiQX-ZVF4eK63Lwr',
-  MIDTRANS_IS_PRODUCTION: false,
-  APP_NAME: 'TokoKu',
 };
 
 const { createClient } = supabase;
@@ -501,6 +465,7 @@ let state = {
   currentCategory: 'semua',
   currentAdminFilter: 'all',
   currentPage: 'store',
+  paymentProofFile: null,
 };
 
 // UTILS
@@ -518,66 +483,24 @@ function formatRp(n) {
 
 function formatDate(d) {
   if (!d) return '-';
-  return new Date(d).toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 function genOrderNumber() {
-  return 'TK-' + Date.now().toString(36).toUpperCase();
-}
-
-function showLoader(show) {
-  const el = document.getElementById('app-loader');
-  el.style.opacity = show ? '1' : '0';
-  el.style.pointerEvents = show ? 'all' : 'none';
+  return 'ORD-' + Date.now().toString(36).toUpperCase();
 }
 
 function statusLabel(s) {
-  return {
-    pending: 'Menunggu',
-    processing: 'Diproses',
-    accepted: 'Disetujui',
-    rejected: 'Ditolak',
-    completed: 'Selesai',
-    cancelled: 'Dibatalkan'
-  }[s] || s;
+  const labels = { pending: 'Menunggu Konfirmasi', paid: 'Dibayar - Menunggu Diproses', rejected: 'Ditolak', completed: 'Selesai' };
+  return labels[s] || s;
 }
 
-function paymentStatusLabel(s) {
-  return {
-    unpaid: 'Belum Bayar',
-    pending: 'Menunggu Bayar',
-    paid: 'Lunas',
-    failed: 'Gagal',
-    expired: 'Kadaluarsa',
-    cancelled: 'Dibatalkan'
-  }[s] || (s || 'Belum Bayar');
-}
-
-function paymentBadgeClass(status) {
-  if (status === 'paid') return 'badge-accepted';
-  if (status === 'pending') return 'badge-pending';
-  if (status === 'failed' || status === 'cancelled' || status === 'expired') return 'badge-rejected';
-  return 'badge-pending';
-}
-
-function normalizePaymentStatus(transactionStatus) {
-  if (['capture', 'settlement'].includes(transactionStatus)) return 'paid';
-  if (transactionStatus === 'pending') return 'pending';
-  if (transactionStatus === 'expire') return 'expired';
-  if (transactionStatus === 'cancel') return 'cancelled';
-  if (['deny', 'failure'].includes(transactionStatus)) return 'failed';
-  return 'pending';
+function getBadgeClass(status) {
+  const classes = { pending: 'badge-pending', paid: 'badge-paid', rejected: 'badge-rejected', completed: 'badge-completed' };
+  return classes[status] || 'badge-pending';
 }
 
 const App = {
-
-  // INIT
   async init() {
     try {
       const saved = localStorage.getItem('tokoku_user');
@@ -585,6 +508,7 @@ const App = {
         state.user = JSON.parse(saved);
         this._applyLogin();
         await this.loadProducts();
+        await this.loadUserOrders();
         this.navigate('store');
       } else {
         this.showAuth();
@@ -593,7 +517,7 @@ const App = {
       localStorage.removeItem('tokoku_user');
       this.showAuth();
     } finally {
-      showLoader(false);
+      document.getElementById('app-loader').style.display = 'none';
     }
   },
 
@@ -605,133 +529,58 @@ const App = {
   },
 
   async loginEmail() {
-    const emailInput = document.getElementById('email-input');
+    const email = document.getElementById('email-input').value.trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast('Email tidak valid', 'error');
+      return;
+    }
     const btn = document.getElementById('login-btn');
-    const email = emailInput.value.trim().toLowerCase();
-
-    if (!email) {
-      toast('Masukkan email dulu', 'error');
-      emailInput.focus();
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast('Format email tidak valid', 'error');
-      emailInput.focus();
-      return;
-    }
-
     btn.disabled = true;
     btn.textContent = '⏳ Masuk...';
-
     try {
-      state.user = {
-        email,
-        id: 'local_' + btoa(email).replace(/=/g, ''),
-        isAdmin: email === CONFIG.ADMIN_EMAIL,
-      };
-
+      state.user = { email, id: 'user_' + btoa(email).replace(/=/g, ''), isAdmin: email === CONFIG.ADMIN_EMAIL };
       localStorage.setItem('tokoku_user', JSON.stringify(state.user));
-
       this._applyLogin();
       await this.loadProducts();
+      await this.loadUserOrders();
       this.navigate('store');
       toast(`Selamat datang, ${email.split('@')[0]} 👋`, 'success');
-    } catch (err) {
-      toast('Gagal masuk: ' + err.message, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Masuk →';
-    }
+    } catch (err) { toast('Gagal masuk: ' + err.message, 'error'); }
+    finally { btn.disabled = false; btn.textContent = 'Masuk →'; }
   },
 
   _applyLogin() {
     if (!state.user) return;
-
-    const { email, isAdmin } = state.user;
-    const name = email.split('@')[0];
-
+    const name = state.user.email.split('@')[0];
     document.getElementById('nav-name').textContent = name;
     document.getElementById('nav-avatar').textContent = name[0].toUpperCase();
-
     document.getElementById('page-auth').classList.remove('active');
     document.getElementById('navbar').classList.remove('hidden');
-
-    if (isAdmin) {
-      document.getElementById('nav-admin-btn').classList.remove('hidden');
-    } else {
-      document.getElementById('nav-admin-btn').classList.add('hidden');
-    }
+    if (state.user.isAdmin) document.getElementById('nav-admin-btn').classList.remove('hidden');
   },
 
   async signOut() {
     localStorage.removeItem('tokoku_user');
     state.user = null;
     state.cart = [];
-    state.orders = [];
-    state.adminOrders = [];
     this.updateCartUI();
-    this.closeCart();
     this.showAuth();
     toast('Berhasil keluar', 'info');
   },
 
-  showUserMenu() {
-    const role = state.user?.isAdmin ? '👑 Admin' : '👤 Pembeli';
-    toast(`${state.user?.email} — ${role}`, 'info');
-  },
-
-  goBack() {
-    if (state.currentPage === 'admin' || state.currentPage === 'orders') {
-      this.navigate('store');
-      return;
-    }
-    this.navigate('store');
-  },
-
-  updateBackButton() {
-    const backBtn = document.getElementById('nav-back-btn');
-    if (!backBtn) return;
-    backBtn.classList.toggle('hidden', state.currentPage === 'store');
-  },
-
-  // NAVIGATE
+  showUserMenu() { toast(`${state.user?.email} — ${state.user?.isAdmin ? 'Admin' : 'Pembeli'}`, 'info'); },
   navigate(page) {
-    if (page === 'admin' && !state.user?.isAdmin) {
-      toast('Halaman admin hanya untuk admin', 'error');
-      return;
-    }
-
+    if (page === 'admin' && !state.user?.isAdmin) { toast('Hanya untuk admin', 'error'); return; }
     state.currentPage = page;
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-auth').classList.remove('active');
-
-    const target = document.getElementById('page-' + page);
-    if (target) {
-      target.classList.add('active');
-      window.scrollTo(0, 0);
-    }
-
-    this.updateBackButton();
-
+    document.getElementById('page-' + page).classList.add('active');
     if (page === 'orders') this.loadUserOrders();
     if (page === 'admin') this.loadAdminData();
   },
 
-  // PRODUCTS
   async loadProducts() {
-    const { data, error } = await db
-      .from('products')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error(error);
-      toast('Gagal load produk', 'error');
-      return;
-    }
-
+    const { data, error } = await db.from('products').select('*').eq('is_active', true).order('created_at', { ascending: false });
+    if (error) { toast('Gagal load produk', 'error'); return; }
     state.allProducts = data || [];
     state.products = [...state.allProducts];
     this.renderCategories();
@@ -740,80 +589,37 @@ const App = {
 
   renderCategories() {
     const cats = ['semua', ...new Set(state.allProducts.map(p => p.category || 'umum'))];
-    document.getElementById('category-tabs').innerHTML = cats.map(c => `
-      <button class="cat-tab ${c === state.currentCategory ? 'active' : ''}" onclick="App.filterCategory('${c}', this)">
-        ${c.charAt(0).toUpperCase() + c.slice(1)}
-      </button>
-    `).join('');
+    document.getElementById('category-tabs').innerHTML = cats.map(c => `<button class="cat-tab ${c === state.currentCategory ? 'active' : ''}" onclick="App.filterCategory('${c}', this)">${c.charAt(0).toUpperCase() + c.slice(1)}</button>`).join('');
   },
 
   filterCategory(cat, el) {
     state.currentCategory = cat;
     document.querySelectorAll('#category-tabs .cat-tab').forEach(t => t.classList.remove('active'));
-    if (el) el.classList.add('active');
+    el.classList.add('active');
     this.filterProducts();
   },
 
   filterProducts() {
     const search = document.getElementById('search-input').value.toLowerCase();
-
     state.products = state.allProducts.filter(p => {
       const matchCat = state.currentCategory === 'semua' || p.category === state.currentCategory;
-      const matchSearch =
-        !search ||
-        (p.name || '').toLowerCase().includes(search) ||
-        (p.description || '').toLowerCase().includes(search);
+      const matchSearch = !search || p.name.toLowerCase().includes(search) || (p.description || '').toLowerCase().includes(search);
       return matchCat && matchSearch;
     });
-
     this.renderProducts();
   },
 
   renderProducts() {
     const grid = document.getElementById('products-grid');
-
-    if (!state.products.length) {
-      grid.innerHTML = `
-        <div class="empty-state" style="grid-column:1/-1">
-          <span class="emo">🔍</span>
-          <h3>Produk tidak ditemukan</h3>
-        </div>
-      `;
-      return;
-    }
-
-    grid.innerHTML = state.products.map(p => `
-      <div class="product-card" onclick="App.openOrderModal('${p.id}')">
-        <div class="prod-img">
-          ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy"/>` : '📦'}
-          ${Number(p.stock) <= 0 ? '<div class="prod-sold-out">Habis</div>' : ''}
-        </div>
-        <div class="prod-info">
-          <div class="prod-name">${p.name}</div>
-          <div class="prod-cat">${p.category || 'umum'}</div>
-          <div class="prod-footer">
-            <div>
-              <div class="prod-price">${formatRp(p.price)}</div>
-              <div class="prod-stock">Stok: ${p.stock}</div>
-            </div>
-            <button class="quick-add" onclick="event.stopPropagation(); App.openOrderModal('${p.id}')" ${Number(p.stock) <= 0 ? 'disabled' : ''}>+</button>
-          </div>
-        </div>
-      </div>
-    `).join('');
+    if (!state.products.length) { grid.innerHTML = '<div class="empty-state"><span class="emo">🔍</span><h3>Produk tidak ditemukan</h3></div>'; return; }
+    grid.innerHTML = state.products.map(p => `<div class="product-card" onclick="App.openOrderModal('${p.id}')"><div class="prod-img">${p.image_url ? `<img src="${p.image_url}" alt="${p.name}"/>` : '📦'}${p.stock <= 0 ? '<div class="prod-sold-out">Habis</div>' : ''}</div><div class="prod-info"><div class="prod-name">${p.name}</div><div class="prod-cat">${p.category || 'umum'}</div><div class="prod-footer"><div><div class="prod-price">${formatRp(p.price)}</div><div class="prod-stock">Stok: ${p.stock}</div></div><button class="quick-add" onclick="event.stopPropagation(); App.openOrderModal('${p.id}')" ${p.stock <= 0 ? 'disabled' : ''}>+</button></div></div></div>`).join('');
   },
 
-  // ORDER MODAL
   openOrderModal(productId) {
     const p = state.allProducts.find(x => x.id === productId);
-    if (!p || Number(p.stock) <= 0) {
-      toast('Stok habis', 'error');
-      return;
-    }
-
+    if (!p || p.stock <= 0) { toast('Stok habis', 'error'); return; }
     state.currentProduct = p;
     state.currentQty = 1;
-
     document.getElementById('modal-product-img').innerHTML = p.image_url ? `<img src="${p.image_url}" alt="${p.name}"/>` : '📦';
     document.getElementById('modal-product-name').textContent = p.name;
     document.getElementById('modal-product-category').textContent = p.category || 'umum';
@@ -822,538 +628,165 @@ const App = {
     document.getElementById('modal-qty-info').textContent = `tersisa: ${p.stock}`;
     document.getElementById('modal-qty').textContent = '1';
     document.getElementById('modal-total').textContent = formatRp(p.price);
-
     document.getElementById('order-modal').classList.add('open');
   },
 
   changeQty(delta) {
     const p = state.currentProduct;
     if (!p) return;
-
-    state.currentQty = Math.max(1, Math.min(Number(p.stock), state.currentQty + delta));
+    state.currentQty = Math.max(1, Math.min(p.stock, state.currentQty + delta));
     document.getElementById('modal-qty').textContent = state.currentQty;
-    document.getElementById('modal-total').textContent = formatRp(Number(p.price) * state.currentQty);
+    document.getElementById('modal-total').textContent = formatRp(p.price * state.currentQty);
   },
 
-  closeModal(id) {
-    document.getElementById(id).classList.remove('open');
-  },
+  closeModal(id) { document.getElementById(id).classList.remove('open'); },
 
-  // CART
   addToCart() {
     const p = state.currentProduct;
     if (!p) return;
-
     const existing = state.cart.find(i => i.id === p.id);
-    if (existing) {
-      existing.quantity = Math.min(Number(p.stock), existing.quantity + state.currentQty);
-    } else {
-      state.cart.push({ ...p, quantity: state.currentQty });
-    }
-
+    if (existing) existing.quantity = Math.min(p.stock, existing.quantity + state.currentQty);
+    else state.cart.push({ ...p, quantity: state.currentQty });
     this.updateCartUI();
     this.closeModal('order-modal');
-    toast(`${p.name} ditambah ke keranjang 🛒`, 'success');
+    toast(`${p.name} ditambah ke keranjang`, 'success');
   },
 
-  buyNow() {
-    this.addToCart();
-    this.openCart();
-  },
-
-  removeFromCart(productId) {
-    state.cart = state.cart.filter(i => i.id !== productId);
-    this.updateCartUI();
-  },
+  removeFromCart(productId) { state.cart = state.cart.filter(i => i.id !== productId); this.updateCartUI(); },
 
   updateCartUI() {
-    const count = state.cart.reduce((s, i) => s + Number(i.quantity), 0);
-    const total = state.cart.reduce((s, i) => s + (Number(i.price) * Number(i.quantity)), 0);
-
-    const countEl = document.getElementById('cart-count');
-    countEl.textContent = count;
-    countEl.classList.toggle('hidden', count === 0);
-
+    const count = state.cart.reduce((s, i) => s + i.quantity, 0);
+    const total = state.cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    document.getElementById('cart-count').textContent = count;
+    document.getElementById('cart-count').classList.toggle('hidden', count === 0);
     document.getElementById('cart-total-display').textContent = formatRp(total);
-
     const list = document.getElementById('cart-items-list');
-
-    if (!state.cart.length) {
-      list.innerHTML = `<div class="empty-state"><span class="emo">🛒</span><h3>Keranjang kosong</h3></div>`;
-      return;
-    }
-
-    list.innerHTML = state.cart.map(item => `
-      <div class="cart-item">
-        <div class="cart-item-img">
-          ${item.image_url ? `<img src="${item.image_url}" alt="${item.name}"/>` : '📦'}
-        </div>
-        <div class="cart-item-info">
-          <div class="cart-item-name">${item.name}</div>
-          <div class="cart-item-price">${formatRp(item.price)} × ${item.quantity}</div>
-          <div class="cart-item-sub">${formatRp(Number(item.price) * Number(item.quantity))}</div>
-        </div>
-        <span class="cart-remove" onclick="App.removeFromCart('${item.id}')">🗑</span>
-      </div>
-    `).join('');
+    if (!state.cart.length) { list.innerHTML = '<div class="empty-state"><span class="emo">🛒</span><h3>Keranjang kosong</h3></div>'; return; }
+    list.innerHTML = state.cart.map(item => `<div class="cart-item"><div class="cart-item-img">${item.image_url ? `<img src="${item.image_url}" alt="${item.name}"/>` : '📦'}</div><div class="cart-item-info"><div class="cart-item-name">${item.name}</div><div class="cart-item-price">${formatRp(item.price)} × ${item.quantity}</div><div class="cart-item-sub">${formatRp(item.price * item.quantity)}</div></div><span class="cart-remove" onclick="App.removeFromCart('${item.id}')">🗑</span></div>`).join('');
   },
 
-  openCart() {
-    document.getElementById('cart-sidebar').classList.add('open');
-    document.getElementById('cart-overlay').classList.add('open');
+  openCart() { document.getElementById('cart-sidebar').classList.add('open'); document.getElementById('cart-overlay').classList.add('open'); },
+  closeCart() { document.getElementById('cart-sidebar').classList.remove('open'); document.getElementById('cart-overlay').classList.remove('open'); },
+
+  openCheckoutModal() {
+    if (!state.cart.length) { toast('Keranjang kosong', 'error'); return; }
+    const total = state.cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    document.getElementById('checkout-total').textContent = formatRp(total);
+    document.getElementById('checkout-name').value = '';
+    document.getElementById('checkout-phone').value = '';
+    document.getElementById('checkout-address').value = '';
+    document.getElementById('checkout-notes').value = '';
+    document.getElementById('proof-preview').classList.add('hidden');
+    document.getElementById('proof-placeholder').style.display = '';
+    document.getElementById('payment-proof').value = '';
+    state.paymentProofFile = null;
+    document.getElementById('checkout-modal').classList.add('open');
   },
 
-  closeCart() {
-    document.getElementById('cart-sidebar').classList.remove('open');
-    document.getElementById('cart-overlay').classList.remove('open');
-  },
-
-  // CHECKOUT + MIDTRANS
- // CHECKOUT + MIDTRANS (dengan API backend)
-async checkout() {
-  if (!state.user) {
-    toast('Silakan login dulu', 'error');
-    return;
-  }
-
-  if (!state.cart.length) {
-    toast('Keranjang kosong', 'error');
-    return;
-  }
-
-  const address = document.getElementById('cart-address').value.trim();
-  const notes = document.getElementById('cart-notes').value.trim();
-
-  if (!address) {
-    toast('Masukkan alamat pengiriman', 'error');
-    return;
-  }
-
-  const btn = document.getElementById('checkout-btn');
-  btn.disabled = true;
-  btn.textContent = '⏳ Membuat pesanan...';
-
-  const orderNumber = genOrderNumber();
-  const total = state.cart.reduce((s, i) => s + (Number(i.price) * Number(i.quantity)), 0);
-  const customerName = state.user.email.split('@')[0];
-
-  let createdOrder = null;
-
-  try {
-    // 1. Create order di database
-    const { data: order, error: orderErr } = await db
-      .from('orders')
-      .insert({
-        order_number: orderNumber,
-        status: 'pending',
-        total_amount: total,
-        payment_status: 'pending',
-        customer_name: customerName,
-        customer_email: state.user.email,
-        customer_phone: '',
-        customer_address: address,
-        notes: notes,
-        midtrans_order_id: orderNumber,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (orderErr) throw new Error(orderErr.message);
-    createdOrder = order;
-
-    // 2. Insert order items
-    const items = state.cart.map(i => ({
-      order_id: order.id,
-      product_id: i.id,
-      product_name: i.name,
-      product_image: i.image_url || null,
-      quantity: Number(i.quantity),
-      unit_price: Number(i.price),
-      subtotal: Number(i.price) * Number(i.quantity),
-    }));
-
-    const { error: itemsErr } = await db.from('order_items').insert(items);
-    if (itemsErr) throw new Error(itemsErr.message);
-
-    // 3. Request snap token dari API backend
-    const response = await fetch('/api/create-payment', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        orderId: orderNumber,
-        amount: total,
-        customerDetails: {
-          first_name: customerName,
-          email: state.user.email,
-          phone: '',
-        },
-        items: state.cart.map(i => ({
-          id: i.id,
-          product_id: i.id,
-          price: Number(i.price),
-          unit_price: Number(i.price),
-          quantity: Number(i.quantity),
-          name: i.name,
-          product_name: i.name,
-        })),
-      }),
-    });
-
-    const responseText = await response.text();
-    let payData;
-    
-    try {
-      payData = JSON.parse(responseText);
-    } catch (e) {
-      console.error('Response bukan JSON:', responseText);
-      throw new Error('Server error: ' + responseText.substring(0, 100));
-    }
-
-    if (!response.ok) {
-      throw new Error(payData.error || 'Gagal membuat transaksi Midtrans');
-    }
-
-    if (!payData.token && !payData.redirect_url) {
-      throw new Error('Token pembayaran tidak valid');
-    }
-
-    // 4. Save token & redirect_url ke database
-    const updateData = {
-      midtrans_token: payData.token || null,
-      midtrans_redirect_url: payData.redirect_url || null,
-      updated_at: new Date().toISOString(),
+  previewPaymentProof(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast('File harus gambar', 'error'); return; }
+    if (file.size > 5 * 1024 * 1024) { toast('Maksimal 5MB', 'error'); return; }
+    state.paymentProofFile = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('proof-preview').src = e.target.result;
+      document.getElementById('proof-preview').classList.remove('hidden');
+      document.getElementById('proof-placeholder').style.display = 'none';
     };
-    
-    const { error: updErr } = await db
-      .from('orders')
-      .update(updateData)
-      .eq('id', order.id);
+    reader.readAsDataURL(file);
+  },
 
-    if (updErr) {
-      console.warn('Gagal update token:', updErr);
-      // Lanjutkan meskipun gagal update token
-    }
+  async submitOrder() {
+    const name = document.getElementById('checkout-name').value.trim();
+    const phone = document.getElementById('checkout-phone').value.trim();
+    const address = document.getElementById('checkout-address').value.trim();
+    const bank = document.getElementById('checkout-bank').value;
+    const notes = document.getElementById('checkout-notes').value.trim();
 
-    // 5. Clear cart setelah order berhasil dibuat
-    state.cart = [];
-    this.updateCartUI();
-    this.closeCart();
-    document.getElementById('cart-address').value = '';
-    document.getElementById('cart-notes').value = '';
+    if (!name) { toast('Nama lengkap wajib diisi', 'error'); return; }
+    if (!phone) { toast('Nomor telepon wajib diisi', 'error'); return; }
+    if (!address) { toast('Alamat wajib diisi', 'error'); return; }
+    if (!state.paymentProofFile) { toast('Upload bukti transfer', 'error'); return; }
 
-    // 6. Buka Snap payment
-    if (window.snap && payData.token) {
-      window.snap.pay(payData.token, {
-        onSuccess: async (result) => {
-          await this.handleMidtransResult(order.id, result);
-          toast('Pembayaran berhasil 🎉', 'success');
-          this.navigate('orders');
-          await this.loadUserOrders();
-          if (state.user?.isAdmin) await this.loadAdminData();
-        },
-        onPending: async (result) => {
-          await this.handleMidtransResult(order.id, result);
-          toast('Pembayaran pending, silakan selesaikan pembayaran', 'info');
-          this.navigate('orders');
-          await this.loadUserOrders();
-        },
-        onError: async (result) => {
-          await this.handleMidtransResult(order.id, result || { transaction_status: 'failure' });
-          toast('Pembayaran gagal', 'error');
-          this.navigate('orders');
-          await this.loadUserOrders();
-        },
-        onClose: () => {
-          toast('Popup pembayaran ditutup. Kamu bisa bayar nanti dari halaman pesanan.', 'info');
-          this.navigate('orders');
-        }
-      });
-    } else if (payData.redirect_url) {
-      window.open(payData.redirect_url, '_blank');
-      toast('Halaman pembayaran dibuka di tab baru', 'info');
+    const btn = document.querySelector('#checkout-modal .btn-primary');
+    btn.disabled = true;
+    btn.textContent = '⏳ Memproses...';
+
+    try {
+      const fileName = `proof_${Date.now()}.${state.paymentProofFile.name.split('.').pop()}`;
+      const { error: uploadErr } = await db.storage.from('payment-proofs').upload(fileName, state.paymentProofFile);
+      if (uploadErr) throw new Error('Gagal upload bukti: ' + uploadErr.message);
+      const { data: urlData } = db.storage.from('payment-proofs').getPublicUrl(fileName);
+      const proofUrl = urlData.publicUrl;
+
+      const total = state.cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+      const orderNumber = genOrderNumber();
+
+      const { data: order, error: orderErr } = await db.from('orders').insert({
+        order_number: orderNumber, status: 'pending', total_amount: total,
+        customer_name: name, customer_email: state.user.email, customer_phone: phone,
+        customer_address: address, payment_method: bank, payment_proof_url: proofUrl, notes: notes,
+        created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+      }).select().single();
+
+      if (orderErr) throw new Error(orderErr.message);
+
+      const items = state.cart.map(i => ({
+        order_id: order.id, product_id: i.id, product_name: i.name,
+        product_image: i.image_url || null, quantity: i.quantity,
+        unit_price: i.price, subtotal: i.price * i.quantity,
+      }));
+      const { error: itemsErr } = await db.from('order_items').insert(items);
+      if (itemsErr) throw new Error(itemsErr.message);
+
+      state.cart = [];
+      this.updateCartUI();
+      this.closeCart();
+      this.closeModal('checkout-modal');
+      toast('Pesanan berhasil dikirim! Menunggu konfirmasi admin.', 'success');
       this.navigate('orders');
       await this.loadUserOrders();
-    } else {
-      throw new Error('Tidak ada token atau redirect URL dari Midtrans');
-    }
+      if (state.user.isAdmin) await this.loadAdminData();
 
-  } catch (err) {
-    console.error('Checkout error:', err);
-    
-    // Update status pesanan jadi failed jika gagal
-    if (createdOrder?.id) {
-      await db.from('orders').update({
-        payment_status: 'failed',
-        midtrans_transaction_status: 'failure',
-        updated_at: new Date().toISOString(),
-      }).eq('id', createdOrder.id);
-    }
-
-    toast('Error: ' + err.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '💳 Buat Pesanan';
-  }
-},
-
-  async handleMidtransResult(orderId, result) {
-    const txStatus = result?.transaction_status || 'pending';
-    const paymentStatus = normalizePaymentStatus(txStatus);
-
-    const updateData = {
-      payment_status: paymentStatus,
-      payment_type: result?.payment_type || null,
-      transaction_id: result?.transaction_id || null,
-      midtrans_transaction_status: txStatus,
-      updated_at: new Date().toISOString(),
-    };
-
-    if (paymentStatus === 'paid') {
-      updateData.paid_at = new Date().toISOString();
-      // status order tetap "pending" supaya admin bisa setujui / tolak
-      updateData.status = 'pending';
-    }
-
-    await db.from('orders').update(updateData).eq('id', orderId);
+    } catch (err) { toast('Error: ' + err.message, 'error'); }
+    finally { btn.disabled = false; btn.textContent = '📤 Kirim Pesanan'; }
   },
 
-  async payExistingOrder(orderId, snapToken, redirectUrl) {
-    if (window.snap && snapToken) {
-      window.snap.pay(snapToken, {
-        onSuccess: async (result) => {
-          await this.handleMidtransResult(orderId, result);
-          toast('Pembayaran berhasil 🎉', 'success');
-          await this.loadUserOrders();
-          if (state.user?.isAdmin) await this.loadAdminData();
-        },
-        onPending: async (result) => {
-          await this.handleMidtransResult(orderId, result);
-          toast('Pembayaran masih pending', 'info');
-          await this.loadUserOrders();
-        },
-        onError: async (result) => {
-          await this.handleMidtransResult(orderId, result || { transaction_status: 'failure' });
-          toast('Pembayaran gagal', 'error');
-          await this.loadUserOrders();
-        },
-        onClose: () => {
-          toast('Popup pembayaran ditutup', 'info');
-        }
-      });
-      return;
-    }
-
-    if (redirectUrl) {
-      window.open(redirectUrl, '_blank');
-      return;
-    }
-
-    toast('Link pembayaran tidak tersedia', 'error');
-  },
-
-  // USER ORDERS
   async loadUserOrders() {
-    if (!state.user?.email) {
-      document.getElementById('user-orders-list').innerHTML = `
-        <div class="empty-state"><span class="emo">📦</span><h3>Silakan login dulu</h3></div>
-      `;
-      return;
-    }
-
-    document.getElementById('user-orders-list').innerHTML = `
-      <div class="empty-state"><span class="emo">⏳</span><h3>Memuat...</h3></div>
-    `;
-
-    const { data, error } = await db
-      .from('orders')
-      .select('*, order_items(*)')
-      .eq('customer_email', state.user.email)
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    if (error) {
-      toast('Gagal load pesanan: ' + error.message, 'error');
-      return;
-    }
-
+    if (!state.user?.email) return;
+    const { data, error } = await db.from('orders').select('*, order_items(*)').eq('customer_email', state.user.email).order('created_at', { ascending: false });
+    if (error) { toast('Gagal load pesanan', 'error'); return; }
     state.orders = data || [];
     this.renderUserOrders();
   },
 
   renderUserOrders() {
     const list = document.getElementById('user-orders-list');
-
-    if (!state.orders.length) {
-      list.innerHTML = `
-        <div class="empty-state">
-          <span class="emo">📦</span>
-          <h3>Belum ada pesanan</h3>
-          <p>Yuk belanja dulu!</p>
-          <button class="btn btn-primary" onclick="App.navigate('store')" style="margin-top:14px">🛒 Belanja Sekarang</button>
-        </div>
-      `;
-      return;
-    }
-
-    list.innerHTML = state.orders.map(o => `
-      <div class="order-card">
-        <div class="order-card-top">
-          <div>
-            <div class="order-num">${o.order_number}</div>
-            <div class="order-date">${formatDate(o.created_at)}</div>
-          </div>
-
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <span class="badge badge-${o.status}">${statusLabel(o.status)}</span>
-            <span class="badge ${paymentBadgeClass(o.payment_status)}">${paymentStatusLabel(o.payment_status)}</span>
-          </div>
-        </div>
-
-        <div class="order-chips">
-          ${(o.order_items || []).map(i => `<span class="order-chip">${i.product_name} ×${i.quantity}</span>`).join('')}
-        </div>
-
-        <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">
-          ${o.customer_address ? `📍 ${o.customer_address}` : ''}
-        </div>
-
-        <div class="order-foot">
-          <div class="order-amt">${formatRp(o.total_amount)}</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            ${o.payment_status !== 'paid' && (o.midtrans_token || o.midtrans_redirect_url) ? `
-              <button class="btn btn-primary btn-sm" onclick="App.payExistingOrder('${o.id}', '${o.midtrans_token || ''}', '${o.midtrans_redirect_url || ''}')">💳 Bayar</button>
-            ` : ''}
-          </div>
-        </div>
-      </div>
-    `).join('');
+    if (!state.orders.length) { list.innerHTML = '<div class="empty-state"><span class="emo">📦</span><h3>Belum ada pesanan</h3><button class="btn btn-primary" onclick="App.navigate(\'store\')">Belanja Sekarang</button></div>'; return; }
+    list.innerHTML = state.orders.map(o => `<div class="order-card"><div class="order-card-top"><div><div class="order-num">${o.order_number}</div><div class="order-date">${formatDate(o.created_at)}</div></div><span class="badge ${getBadgeClass(o.status)}">${statusLabel(o.status)}</span></div><div class="order-chips">${(o.order_items || []).map(i => `<span class="order-chip">${i.product_name} ×${i.quantity}</span>`).join('')}</div><div style="font-size:13px;margin:10px 0">📞 ${o.customer_phone || '-'}<br>📍 ${o.customer_address || '-'}<br>💳 ${o.payment_method || 'Transfer'} ${o.payment_proof_url ? `<br>📷 <span class="img-zoom" onclick="App.showImage('${o.payment_proof_url}')">Lihat Bukti Transfer</span>` : ''}${o.rejected_reason ? `<br>❌ Alasan ditolak: ${o.rejected_reason}` : ''}</div><div class="order-foot"><div class="order-amt">${formatRp(o.total_amount)}</div></div></div>`).join('');
   },
 
-  // ADMIN
-  adminTab(tab, el) {
-    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
+  showImage(url) { document.getElementById('zoom-image').src = url; document.getElementById('image-modal').classList.add('open'); },
 
-    document.getElementById('admin-tab-' + tab).classList.add('active');
-    if (el) el.classList.add('active');
-
-    if (tab === 'products') this.loadAdminProducts();
-    if (tab === 'orders') this.loadAdminOrders();
-    if (tab === 'dashboard') this.loadAdminStats();
-  },
-
-  async loadAdminData() {
-    await Promise.all([this.loadAdminStats(), this.loadAdminOrders()]);
-  },
+  // ADMIN FUNCTIONS
+  async loadAdminData() { await this.loadAdminStats(); await this.loadAdminOrders(); },
 
   async loadAdminStats() {
-    const [{ data: orders }, { data: products }] = await Promise.all([
-      db.from('orders').select('total_amount, status, payment_status'),
-      db.from('products').select('id')
-    ]);
-
-    const totalRevenue = (orders || [])
-      .filter(o => o.payment_status === 'paid' && o.status !== 'rejected' && o.status !== 'cancelled')
-      .reduce((s, o) => s + Number(o.total_amount), 0);
-
+    const { data: orders } = await db.from('orders').select('total_amount, status');
+    const { data: products } = await db.from('products').select('id');
+    const totalRevenue = (orders || []).filter(o => o.status === 'completed').reduce((s, o) => s + Number(o.total_amount), 0);
     const pendingCount = (orders || []).filter(o => o.status === 'pending').length;
-
-    document.getElementById('admin-stats').innerHTML = `
-      <div class="stat-card">
-        <div class="stat-label">Produk</div>
-        <div class="stat-value" style="color:var(--info)">${(products || []).length}</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-label">Total Pesanan</div>
-        <div class="stat-value" style="color:var(--accent)">${(orders || []).length}</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-label">Menunggu</div>
-        <div class="stat-value" style="color:var(--warning)">${pendingCount}</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-label">Revenue</div>
-        <div class="stat-value" style="color:var(--success);font-size:18px">${formatRp(totalRevenue)}</div>
-      </div>
-    `;
-
-    const { data: recent } = await db
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(5);
-
-    document.getElementById('admin-recent-orders').innerHTML =
-      (recent || []).map(o => `
-        <div class="admin-order-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
-            <div>
-              <div style="font-weight:800;font-family:var(--font-display)">${o.order_number}</div>
-              <div style="font-size:13px;color:var(--text-muted)">${o.customer_name || 'Pelanggan'} · ${formatDate(o.created_at)}</div>
-            </div>
-
-            <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
-              <span class="badge badge-${o.status}">${statusLabel(o.status)}</span>
-              <span class="badge ${paymentBadgeClass(o.payment_status)}">${paymentStatusLabel(o.payment_status)}</span>
-              <span style="font-weight:800;color:var(--accent)">${formatRp(o.total_amount)}</span>
-            </div>
-          </div>
-        </div>
-      `).join('') || `
-        <div class="empty-state"><span class="emo">📋</span><h3>Belum ada pesanan</h3></div>
-      `;
-  },
-
-  async loadAdminProducts() {
-    const { data, error } = await db
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      toast('Gagal load produk admin', 'error');
-      return;
-    }
-
-    document.getElementById('admin-products-tbody').innerHTML = (data || []).map(p => `
-      <tr>
-        <td><div class="product-thumb">${p.image_url ? `<img src="${p.image_url}" alt="${p.name}"/>` : '📦'}</div></td>
-        <td style="max-width:180px">
-          <div style="font-weight:600">${p.name}</div>
-          <div style="font-size:12px;color:var(--text-dim)">${p.description || ''}</div>
-        </td>
-        <td style="font-weight:700;color:var(--accent)">${formatRp(p.price)}</td>
-        <td>${p.stock}</td>
-        <td>${p.category || '-'}</td>
-        <td><span class="badge ${p.is_active ? 'badge-accepted' : 'badge-cancelled'}">${p.is_active ? 'Aktif' : 'Nonaktif'}</span></td>
-        <td>
-          <div style="display:flex;gap:6px">
-            <button class="btn btn-secondary btn-sm" onclick="App.editProduct('${p.id}')">✏️</button>
-            <button class="btn btn-danger btn-sm" onclick="App.deleteProduct('${p.id}')">🗑</button>
-          </div>
-        </td>
-      </tr>
-    `).join('');
+    const paidCount = (orders || []).filter(o => o.status === 'paid').length;
+    document.getElementById('admin-stats').innerHTML = `<div class="stat-card"><div class="stat-label">Produk</div><div class="stat-value">${products?.length || 0}</div></div><div class="stat-card"><div class="stat-label">Total Pesanan</div><div class="stat-value">${orders?.length || 0}</div></div><div class="stat-card"><div class="stat-label">Menunggu</div><div class="stat-value" style="color:var(--warning)">${pendingCount}</div></div><div class="stat-card"><div class="stat-label">Dibayar</div><div class="stat-value" style="color:var(--info)">${paidCount}</div></div><div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value" style="font-size:18px">${formatRp(totalRevenue)}</div></div>`;
+    const { data: recent } = await db.from('orders').select('*').order('created_at', { ascending: false }).limit(5);
+    document.getElementById('admin-recent-orders').innerHTML = (recent || []).map(o => `<div class="admin-order-card"><div><strong>${o.order_number}</strong><br>${o.customer_name} · ${formatRp(o.total_amount)}</div><span class="badge ${getBadgeClass(o.status)}">${o.status}</span></div>`).join('') || '<div class="empty-state">Belum ada pesanan</div>';
   },
 
   async loadAdminOrders() {
-    const { data, error } = await db
-      .from('orders')
-      .select('*, order_items(*)')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      toast('Gagal load pesanan admin', 'error');
-      return;
-    }
-
+    const { data, error } = await db.from('orders').select('*, order_items(*)').order('created_at', { ascending: false });
+    if (error) { toast('Gagal load pesanan', 'error'); return; }
     state.adminOrders = data || [];
     this.renderAdminOrders();
   },
@@ -1361,309 +794,131 @@ async checkout() {
   filterAdminOrders(filter, el) {
     state.currentAdminFilter = filter;
     document.querySelectorAll('#order-filter-tabs .cat-tab').forEach(t => t.classList.remove('active'));
-    if (el) el.classList.add('active');
+    el.classList.add('active');
     this.renderAdminOrders();
   },
 
-  getAdminActionButtons(o) {
-    // admin hanya boleh proses order yang sudah dibayar
-    if (o.payment_status !== 'paid') {
-      return `
-        <div style="margin-top:10px;font-size:12px;color:var(--warning)">
-          ⏳ Menunggu pembayaran pelanggan
-        </div>
-      `;
-    }
-
-    if (o.status === 'pending') {
-      return `
-        <div class="order-actions">
-          <button class="btn btn-success btn-sm" onclick="App.updateOrderStatus('${o.id}','accepted')">✅ Setuju</button>
-          <button class="btn btn-danger btn-sm" onclick="App.updateOrderStatus('${o.id}','rejected')">❌ Tolak</button>
-        </div>
-      `;
-    }
-
-    if (o.status === 'accepted') {
-      return `
-        <div class="order-actions">
-          <button class="btn btn-secondary btn-sm" onclick="App.updateOrderStatus('${o.id}','pending')">⏳ Pending</button>
-          <button class="btn btn-primary btn-sm" onclick="App.updateOrderStatus('${o.id}','processing')">🔧 Proses</button>
-          <button class="btn btn-danger btn-sm" onclick="App.updateOrderStatus('${o.id}','rejected')">❌ Tolak</button>
-        </div>
-      `;
-    }
-
-    if (o.status === 'processing') {
-      return `
-        <div class="order-actions">
-          <button class="btn btn-secondary btn-sm" onclick="App.updateOrderStatus('${o.id}','pending')">⏳ Pending</button>
-          <button class="btn btn-success btn-sm" onclick="App.updateOrderStatus('${o.id}','completed')">🎉 Selesai</button>
-        </div>
-      `;
-    }
-
-    if (o.status === 'rejected') {
-      return `
-        <div class="order-actions">
-          <button class="btn btn-secondary btn-sm" onclick="App.updateOrderStatus('${o.id}','pending')">⏳ Pending</button>
-          <button class="btn btn-success btn-sm" onclick="App.updateOrderStatus('${o.id}','accepted')">✅ Setuju</button>
-        </div>
-      `;
-    }
-
-    return `
-      <div style="margin-top:10px;font-size:12px;color:var(--success)">
-        ✅ Pesanan selesai
-      </div>
-    `;
-  },
-
   renderAdminOrders() {
-    const filtered = state.currentAdminFilter === 'all'
-      ? state.adminOrders
-      : state.adminOrders.filter(o => o.status === state.currentAdminFilter);
-
+    const filtered = state.currentAdminFilter === 'all' ? state.adminOrders : state.adminOrders.filter(o => o.status === state.currentAdminFilter);
     const list = document.getElementById('admin-orders-list');
-
-    if (!filtered.length) {
-      list.innerHTML = `<div class="empty-state"><span class="emo">📋</span><h3>Tidak ada pesanan</h3></div>`;
-      return;
-    }
-
-    list.innerHTML = filtered.map(o => `
-      <div class="admin-order-card">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">
-          <div>
-            <div style="font-weight:800;font-size:16px;font-family:var(--font-display)">${o.order_number}</div>
-            <div style="font-size:13px;color:var(--text-muted)">${o.customer_name || 'Pelanggan'} · ${o.customer_email || '-'}</div>
-            <div style="font-size:12px;color:var(--text-dim)">${formatDate(o.created_at)}</div>
-            ${o.customer_address ? `<div style="font-size:12px;color:var(--text-muted);margin-top:4px">📍 ${o.customer_address}</div>` : ''}
-            ${o.notes ? `<div style="font-size:12px;color:var(--text-dim)">📝 ${o.notes}</div>` : ''}
-          </div>
-
-          <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
-            <span class="badge badge-${o.status}">${statusLabel(o.status)}</span>
-            <span class="badge ${paymentBadgeClass(o.payment_status)}">${paymentStatusLabel(o.payment_status)}</span>
-            <span style="font-weight:800;color:var(--accent)">${formatRp(o.total_amount)}</span>
-          </div>
-        </div>
-
-        <div style="margin-top:10px;padding:10px;background:var(--bg-elevated);border-radius:10px">
-          ${(o.order_items || []).map(i => `
-            <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-bottom:1px solid var(--border)">
-              <span>${i.product_name} ×${i.quantity}</span>
-              <span style="color:var(--accent)">${formatRp(i.subtotal)}</span>
-            </div>
-          `).join('')}
-        </div>
-
-        ${this.getAdminActionButtons(o)}
-      </div>
-    `).join('');
+    if (!filtered.length) { list.innerHTML = '<div class="empty-state"><span class="emo">📋</span><h3>Tidak ada pesanan</h3></div>'; return; }
+    list.innerHTML = filtered.map(o => `<div class="admin-order-card"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div><div style="font-weight:800">${o.order_number}</div><div style="font-size:13px">${o.customer_name} · ${o.customer_email}</div><div style="font-size:12px">📞 ${o.customer_phone || '-'}</div><div style="font-size:12px">📍 ${o.customer_address || '-'}</div><div style="font-size:12px">💳 ${o.payment_method || 'Transfer'}</div>${o.payment_proof_url ? `<div style="margin-top:8px"><img src="${o.payment_proof_url}" style="max-width:150px;border-radius:8px;cursor:pointer" onclick="App.showImage('${o.payment_proof_url}')" /></div>` : ''}${o.notes ? `<div style="font-size:12px;margin-top:8px">📝 Catatan: ${o.notes}</div>` : ''}${o.rejected_reason ? `<div style="font-size:12px;color:var(--danger);margin-top:8px">❌ Alasan tolak: ${o.rejected_reason}</div>` : ''}</div><div><span class="badge ${getBadgeClass(o.status)}">${statusLabel(o.status)}</span><div class="order-amt" style="margin-top:8px">${formatRp(o.total_amount)}</div></div></div><div style="margin-top:12px;padding:10px;background:var(--bg-elevated);border-radius:10px">${(o.order_items || []).map(i => `<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0">${i.product_name} ×${i.quantity}<span>${formatRp(i.subtotal)}</span></div>`).join('')}</div><div class="order-actions">${o.status === 'pending' ? `<button class="btn btn-success btn-sm" onclick="App.updateOrderStatus('${o.id}', 'paid')">✅ Terima Pesanan</button><button class="btn btn-danger btn-sm" onclick="App.rejectOrder('${o.id}')">❌ Tolak Pesanan</button>` : ''}${o.status === 'paid' ? `<button class="btn btn-success btn-sm" onclick="App.updateOrderStatus('${o.id}', 'completed')">🎉 Selesaikan Pesanan</button>` : ''}${o.status === 'rejected' ? `<button class="btn btn-warning btn-sm" onclick="App.updateOrderStatus('${o.id}', 'pending')">↩️ Batalkan Penolakan</button>` : ''}</div></div>`).join('');
   },
 
   async updateOrderStatus(orderId, status) {
-    const current = state.adminOrders.find(o => o.id === orderId);
-    if (!current) return;
-
-    if (current.payment_status !== 'paid' && status !== 'pending') {
-      toast('Pesanan belum dibayar, tidak bisa diproses admin', 'error');
-      return;
-    }
-
-    const { error } = await db
-      .from('orders')
-      .update({
-        status,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderId);
-
-    if (error) {
-      toast('Gagal update status', 'error');
-      return;
-    }
-
-    toast('Status pesanan diperbarui ✅', 'success');
+    const { error } = await db.from('orders').update({ status, updated_at: new Date().toISOString() }).eq('id', orderId);
+    if (error) { toast('Gagal update status', 'error'); return; }
+    toast(`Status pesanan diubah menjadi ${statusLabel(status)}`, 'success');
     await this.loadAdminOrders();
     await this.loadAdminStats();
-    if (state.user?.email) await this.loadUserOrders();
+    await this.loadUserOrders();
+  },
+
+  async rejectOrder(orderId) {
+    const reason = prompt('Masukkan alasan penolakan pesanan:');
+    if (!reason) return;
+    const { error } = await db.from('orders').update({ status: 'rejected', rejected_reason: reason, updated_at: new Date().toISOString() }).eq('id', orderId);
+    if (error) { toast('Gagal menolak pesanan', 'error'); return; }
+    toast('Pesanan ditolak', 'success');
+    await this.loadAdminOrders();
+    await this.loadAdminStats();
+    await this.loadUserOrders();
   },
 
   // PRODUCT CRUD
-  previewImage(input) {
+  previewProductImage(input) {
     const file = input.files[0];
     if (!file) return;
-
     const reader = new FileReader();
-    reader.onload = e => {
-      document.getElementById('upload-preview').src = e.target.result;
-      document.getElementById('upload-preview').classList.remove('hidden');
-      document.getElementById('upload-placeholder').style.display = 'none';
-    };
+    reader.onload = e => { document.getElementById('upload-preview').src = e.target.result; document.getElementById('upload-preview').classList.remove('hidden'); document.getElementById('upload-placeholder').style.display = 'none'; };
     reader.readAsDataURL(file);
   },
 
   async saveProduct() {
     const name = document.getElementById('prod-name').value.trim();
     const price = parseFloat(document.getElementById('prod-price').value);
-    const stock = parseInt(document.getElementById('prod-stock').value || '0', 10);
+    const stock = parseInt(document.getElementById('prod-stock').value || '0');
     const desc = document.getElementById('prod-desc').value.trim();
     const category = document.getElementById('prod-category').value.trim() || 'umum';
     const editingId = document.getElementById('editing-product-id').value;
-
-    if (!name || isNaN(price) || price <= 0) {
-      toast('Nama dan harga wajib diisi', 'error');
-      return;
-    }
-
+    if (!name || isNaN(price) || price <= 0) { toast('Nama dan harga wajib diisi', 'error'); return; }
     const btn = document.getElementById('save-product-btn');
     btn.disabled = true;
     btn.textContent = '⏳ Menyimpan...';
-
-    try {        let image_url = null;
-        const fileInput = document.getElementById('product-image-input');
-
-        if (fileInput.files[0]) {
-          const file = fileInput.files[0];
-          const ext = file.name.split('.').pop();
-          const fileName = `${Date.now()}.${ext}`;
-
-          const { error: uploadErr } = await db.storage
-            .from('product-images')
-            .upload(fileName, file);
-
-          if (uploadErr) throw new Error('Gagal upload gambar: ' + uploadErr.message);
-
-          const { data: urlData } = db.storage
-            .from('product-images')
-            .getPublicUrl(fileName);
-
-          image_url = urlData.publicUrl;
-        }
-
-        const productData = {
-          name,
-          price,
-          stock: isNaN(stock) ? 0 : stock,
-          description: desc,
-          category,
-        };
-
-        if (image_url) productData.image_url = image_url;
-
-        let error;
-
-        if (editingId) {
-          ({ error } = await db
-            .from('products')
-            .update({
-              ...productData,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', editingId));
-        } else {
-          ({ error } = await db
-            .from('products')
-            .insert({
-              ...productData,
-              is_active: true
-            }));
-        }
-
-        if (error) throw new Error(error.message);
-
-        toast(editingId ? 'Produk berhasil diperbarui ✅' : 'Produk berhasil ditambahkan ✅', 'success');
-
-        this.resetProductForm();
-        await this.loadProducts();
-        await this.loadAdminProducts();
-
-        const productBtn = document.querySelector('.admin-nav-item[onclick*="products"]');
-        if (productBtn) this.adminTab('products', productBtn);
-
-      } catch (err) {
-        console.error(err);
-        toast(err.message || 'Gagal menyimpan produk', 'error');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '💾 Simpan';
+    try {
+      let image_url = null;
+      const fileInput = document.getElementById('product-image-input');
+      if (fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const fileName = `${Date.now()}.${file.name.split('.').pop()}`;
+        const { error: uploadErr } = await db.storage.from('product-images').upload(fileName, file);
+        if (uploadErr) throw new Error('Gagal upload gambar');
+        const { data: urlData } = db.storage.from('product-images').getPublicUrl(fileName);
+        image_url = urlData.publicUrl;
       }
-    },
-
-    async editProduct(id) {
-      const { data: p, error } = await db
-        .from('products')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error || !p) {
-        toast('Produk tidak ditemukan', 'error');
-        return;
-      }
-
-      document.getElementById('prod-name').value = p.name || '';
-      document.getElementById('prod-price').value = p.price || '';
-      document.getElementById('prod-stock').value = p.stock || 0;
-      document.getElementById('prod-desc').value = p.description || '';
-      document.getElementById('prod-category').value = p.category || '';
-      document.getElementById('editing-product-id').value = p.id;
-      document.getElementById('add-product-title').textContent = '✏️ Edit Produk';
-
-      if (p.image_url) {
-        document.getElementById('upload-preview').src = p.image_url;
-        document.getElementById('upload-preview').classList.remove('hidden');
-        document.getElementById('upload-placeholder').style.display = 'none';
-      } else {
-        document.getElementById('upload-preview').classList.add('hidden');
-        document.getElementById('upload-placeholder').style.display = '';
-      }
-
-      const addBtn = document.querySelector('.admin-nav-item[onclick*="add-product"]');
-      if (addBtn) this.adminTab('add-product', addBtn);
-    },
-
-    async deleteProduct(id) {
-      if (!confirm('Hapus produk ini?')) return;
-
-      const { error } = await db
-        .from('products')
-        .update({
-          is_active: false,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id);
-
-      if (error) {
-        toast('Gagal menghapus produk', 'error');
-        return;
-      }
-
-      toast('Produk berhasil dinonaktifkan ✅', 'success');
+      const productData = { name, price, stock, description: desc, category };
+      if (image_url) productData.image_url = image_url;
+      let error;
+      if (editingId) ({ error } = await db.from('products').update({ ...productData, updated_at: new Date().toISOString() }).eq('id', editingId));
+      else ({ error } = await db.from('products').insert({ ...productData, is_active: true }));
+      if (error) throw new Error(error.message);
+      toast(editingId ? 'Produk diperbarui' : 'Produk ditambahkan', 'success');
+      this.resetProductForm();
       await this.loadProducts();
       await this.loadAdminProducts();
-    },
+    } catch (err) { toast(err.message, 'error'); }
+    finally { btn.disabled = false; btn.textContent = '💾 Simpan'; }
+  },
 
-    resetProductForm() {
-      ['prod-name', 'prod-price', 'prod-stock', 'prod-desc', 'prod-category'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
+  async loadAdminProducts() {
+    const { data } = await db.from('products').select('*').order('created_at', { ascending: false });
+    document.getElementById('admin-products-tbody').innerHTML = (data || []).map(p => `<tr><td><div class="product-thumb">${p.image_url ? `<img src="${p.image_url}"/>` : '📦'}</div></td><td><strong>${p.name}</strong><br><small>${p.description || ''}</small></td><td>${formatRp(p.price)}</td><td>${p.stock}</td><td>${p.category || '-'}</td><td><span class="badge ${p.is_active ? 'badge-paid' : 'badge-rejected'}">${p.is_active ? 'Aktif' : 'Nonaktif'}</span></td><td><button class="btn btn-secondary btn-sm" onclick="App.editProduct('${p.id}')">✏️</button> <button class="btn btn-danger btn-sm" onclick="App.deleteProduct('${p.id}')">🗑</button></td></tr>`).join('');
+  },
 
-      document.getElementById('editing-product-id').value = '';
-      document.getElementById('product-image-input').value = '';
-      document.getElementById('upload-preview').src = '';
-      document.getElementById('upload-preview').classList.add('hidden');
-      document.getElementById('upload-placeholder').style.display = '';
-      document.getElementById('add-product-title').textContent = '➕ Tambah Produk';
-    },
+  async editProduct(id) {
+    const { data: p } = await db.from('products').select('*').eq('id', id).single();
+    if (!p) return;
+    document.getElementById('prod-name').value = p.name;
+    document.getElementById('prod-price').value = p.price;
+    document.getElementById('prod-stock').value = p.stock;
+    document.getElementById('prod-desc').value = p.description || '';
+    document.getElementById('prod-category').value = p.category || '';
+    document.getElementById('editing-product-id').value = p.id;
+    document.getElementById('add-product-title').textContent = '✏️ Edit Produk';
+    if (p.image_url) { document.getElementById('upload-preview').src = p.image_url; document.getElementById('upload-preview').classList.remove('hidden'); document.getElementById('upload-placeholder').style.display = 'none'; }
+    this.adminTab('add-product', document.querySelector('.admin-nav-item[onclick*="add-product"]'));
+  },
+
+  async deleteProduct(id) {
+    if (!confirm('Hapus produk ini?')) return;
+    await db.from('products').update({ is_active: false, updated_at: new Date().toISOString() }).eq('id', id);
+    toast('Produk dinonaktifkan', 'success');
+    await this.loadProducts();
+    await this.loadAdminProducts();
+  },
+
+  resetProductForm() {
+    ['prod-name', 'prod-price', 'prod-stock', 'prod-desc', 'prod-category'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('editing-product-id').value = '';
+    document.getElementById('product-image-input').value = '';
+    document.getElementById('upload-preview').src = '';
+    document.getElementById('upload-preview').classList.add('hidden');
+    document.getElementById('upload-placeholder').style.display = '';
+    document.getElementById('add-product-title').textContent = '➕ Tambah Produk';
+  },
+
+  adminTab(tab, el) {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('admin-tab-' + tab).classList.add('active');
+    if (el) el.classList.add('active');
+    if (tab === 'products') this.loadAdminProducts();
+    if (tab === 'orders') this.loadAdminOrders();
+    if (tab === 'dashboard') this.loadAdminStats();
+  },
 };
 
-// BOOT
 document.addEventListener('DOMContentLoaded', () => App.init());
 </script>
-
 </body>
 </html>
