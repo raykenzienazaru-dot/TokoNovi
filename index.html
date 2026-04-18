@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
 <style>
+/* ========== SEMUA CSS SAMA SEPERTI SEBELUMNYA ========== */
 :root {
   --bg: #07070d;
   --bg-card: #0f0f1a;
@@ -279,17 +280,12 @@ select.form-input{cursor:pointer}
   .auth-card{padding:32px 22px}
   .page{padding:22px 16px}
   
-  /* Sembunyikan nav actions di mobile, tampilkan hamburger */
   .nav-actions .btn-ghost:not(.mobile-show), 
   .nav-actions .nav-pill,
   .nav-actions #nav-admin-btn{display:none}
   
   .hamburger{display:flex}
   .nav-actions{display:flex;align-items:center;gap:12px}
-  
-  /* Tampilkan avatar di mobile */
-  .nav-actions .nav-pill.mobile-avatar{display:flex !important;padding:4px 8px}
-  .nav-actions .nav-pill.mobile-avatar .nav-name{display:none}
 }
 
 @media(min-width:769px){
@@ -369,7 +365,6 @@ select.form-input{cursor:pointer}
     <a class="nav-logo" onclick="App.navigate('store')">🛍️ TokoKu</a>
   </div>
   
-  <!-- Desktop Menu -->
   <div class="nav-actions" id="desktop-menu">
     <button class="btn btn-ghost btn-sm" onclick="App.navigate('store')">🏠 Beranda</button>
     <span id="nav-admin-btn" class="hidden"><button class="btn btn-secondary btn-sm" onclick="App.navigate('admin')">⚙️ Admin</button></span>
@@ -379,7 +374,6 @@ select.form-input{cursor:pointer}
     <button class="btn btn-ghost btn-sm" onclick="App.signOut()">Keluar</button>
   </div>
   
-  <!-- Hamburger Menu for Mobile -->
   <div class="hamburger" id="hamburger" onclick="App.toggleMobileMenu()">
     <span></span>
     <span></span>
@@ -423,7 +417,7 @@ select.form-input{cursor:pointer}
   <div class="products-grid" id="products-grid"></div>
 </div>
 
-<!-- ORDERS PAGE (HISTORY) -->
+<!-- ORDERS PAGE -->
 <div id="page-orders" class="page">
   <div class="section-title">📦 History Pesanan Saya</div>
   <div class="orders-list" id="user-orders-list"></div>
@@ -506,11 +500,11 @@ select.form-input{cursor:pointer}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-// CONFIG
+// CONFIG - MULTIPLE ADMIN SUPPORT
 const CONFIG = {
   SUPABASE_URL: 'https://vtozhwkvhtjfytmqdxkf.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_6eb_n7WUi2AZascv7bnwNQ_D75nSZsf',
-  ADMIN_EMAIL: ['raykenzienazaru@gmail.com', 'noviantinovianti170@gmail.com'],
+  ADMIN_EMAILS: ['raykenzienazaru@gmail.com', 'noviantinovianti170@gmail.com'],
 };
 
 const { createClient } = supabase;
@@ -625,7 +619,12 @@ const App = {
     btn.disabled = true;
     btn.textContent = '⏳ Masuk...';
     try {
-      state.user = { email, id: 'user_' + btoa(email).replace(/=/g, ''), isAdmin: email === CONFIG.ADMIN_EMAIL };
+      // PERBAIKAN: Gunakan includes() untuk cek multiple admin
+      state.user = { 
+        email, 
+        id: 'user_' + btoa(email).replace(/=/g, ''), 
+        isAdmin: CONFIG.ADMIN_EMAILS.includes(email)
+      };
       localStorage.setItem('tokoku_user', JSON.stringify(state.user));
       this._applyLogin();
       await this.loadProducts();
@@ -984,7 +983,7 @@ const App = {
 
   async loadAdminProducts() {
     const { data } = await db.from('products').select('*').order('created_at', { ascending: false });
-    document.getElementById('admin-products-tbody').innerHTML = (data || []).map(p => `<tr><td><div class="product-thumb">${p.image_url ? `<img src="${p.image_url}"/>` : '📦'}</div></td><td><strong>${p.name}</strong><br><small>${p.description || ''}</small></td><td>${formatRp(p.price)}</td><td>${p.stock}</td><td>${p.category || '-'}</td><td><span class="badge ${p.is_active ? 'badge-paid' : 'badge-rejected'}">${p.is_active ? 'Aktif' : 'Nonaktif'}</span></td><td><button class="btn btn-secondary btn-sm" onclick="App.editProduct('${p.id}')">✏️</button> <button class="btn btn-danger btn-sm" onclick="App.deleteProduct('${p.id}')">🗑</button></td></tr>`).join('');
+    document.getElementById('admin-products-tbody').innerHTML = (data || []).map(p => `<tr><td><div class="product-thumb">${p.image_url ? `<img src="${p.image_url}"/>` : '📦'}</div></td><td><strong>${p.name}</strong><br><small>${p.description || ''}</small></td><td>${formatRp(p.price)}</td><td>${p.stock}</td><td>${p.category || '-'}</td><td><span class="badge ${p.is_active ? 'badge-paid' : 'badge-rejected'}">${p.is_active ? 'Aktif' : 'Nonaktif'}</span></td><td><button class="btn btn-secondary btn-sm" onclick="App.editProduct('${p.id}')">✏️</button> <button class="btn btn-danger btn-sm" onclick="App.deleteProduct('${p.id}')">🗑</button></td></table>`).join('');
   },
 
   async editProduct(id) {
