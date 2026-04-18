@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
 <style>
+/* ========== SAMA SEPERTI SEBELUMNYA (tidak berubah) ========== */
 :root {
   --bg: #07070d;
   --bg-card: #0f0f1a;
@@ -205,15 +206,20 @@ select.form-input{cursor:pointer}
 
 /* ORDERS */
 .orders-list{display:flex;flex-direction:column;gap:12px}
-.order-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:18px 22px}
-.order-card:hover{border-color:var(--border-strong)}
+.order-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:18px 22px;transition:all var(--transition)}
+.order-card:hover{border-color:var(--border-strong);transform:translateY(-2px)}
 .order-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
-.order-num{font-family:var(--font-display);font-weight:800;font-size:15px}
+.order-num{font-family:var(--font-display);font-weight:800;font-size:15px;color:var(--accent)}
 .order-date{font-size:12px;color:var(--text-muted)}
 .order-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .order-chip{background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:3px 9px;font-size:12px}
 .order-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:10px}
-.order-amt{font-weight:800;font-size:17px;color:var(--accent)}
+.order-amt{font-weight:800;font-size:18px;color:var(--accent)}
+.detail-info{background:var(--bg-elevated);padding:10px;border-radius:10px;margin:10px 0;font-size:13px;line-height:1.8}
+
+/* BACK BUTTON */
+.back-button{display:inline-flex;align-items:center;gap:8px;margin-bottom:20px;padding:8px 16px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:99px;cursor:pointer;color:var(--text-muted);font-size:13px;transition:all var(--transition)}
+.back-button:hover{background:var(--accent-glow);border-color:var(--accent);color:var(--accent)}
 
 /* ADMIN */
 .admin-layout{display:grid;grid-template-columns:200px 1fr;gap:20px;min-height:calc(100vh - 64px)}
@@ -332,7 +338,10 @@ select.form-input{cursor:pointer}
 
 <!-- NAVBAR -->
 <nav id="navbar" class="hidden">
-  <a class="nav-logo" onclick="App.navigate('store')">🛍️ TokoKu</a>
+  <div style="display:flex;align-items:center;gap:16px">
+    <button class="btn btn-ghost btn-sm" id="back-btn" onclick="App.goBack()" style="display:none">← Kembali</button>
+    <a class="nav-logo" onclick="App.navigate('store')">🛍️ TokoKu</a>
+  </div>
   <div class="nav-actions">
     <span id="nav-admin-btn" class="hidden"><button class="btn btn-secondary btn-sm" onclick="App.navigate('admin')">⚙️ Admin</button></span>
     <button class="btn btn-ghost btn-sm" onclick="App.navigate('orders')">📦 Pesanan Saya</button>
@@ -366,10 +375,13 @@ select.form-input{cursor:pointer}
   <div class="products-grid" id="products-grid"></div>
 </div>
 
-<!-- ORDERS PAGE -->
+<!-- ORDERS PAGE (HISTORY) -->
 <div id="page-orders" class="page">
   <div class="section-title">📦 History Pesanan Saya</div>
   <div class="orders-list" id="user-orders-list"></div>
+  <div style="margin-top:20px;text-align:center">
+    <button class="btn btn-secondary" onclick="App.navigate('store')">← Kembali ke Toko</button>
+  </div>
 </div>
 
 <!-- ADMIN PAGE -->
@@ -381,6 +393,7 @@ select.form-input{cursor:pointer}
       <button class="admin-nav-item" onclick="App.adminTab('products',this)">📦 Produk</button>
       <button class="admin-nav-item" onclick="App.adminTab('add-product',this)">➕ Tambah Produk</button>
       <button class="admin-nav-item" onclick="App.adminTab('orders',this)">🛒 Pesanan Masuk</button>
+      <button class="admin-nav-item" onclick="App.navigate('store')">← Kembali ke Toko</button>
     </aside>
     <div>
       <div id="admin-tab-dashboard" class="admin-tab active">
@@ -491,7 +504,7 @@ function genOrderNumber() {
 }
 
 function statusLabel(s) {
-  const labels = { pending: 'Menunggu Konfirmasi', paid: 'Dibayar - Menunggu Diproses', rejected: 'Ditolak', completed: 'Selesai' };
+  const labels = { pending: '⏳ Menunggu Konfirmasi', paid: '✅ Dibayar - Menunggu Diproses', rejected: '❌ Ditolak', completed: '🎉 Selesai' };
   return labels[s] || s;
 }
 
@@ -526,6 +539,7 @@ const App = {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-auth').classList.add('active');
     document.getElementById('nav-admin-btn').classList.add('hidden');
+    document.getElementById('back-btn').style.display = 'none';
   },
 
   async loginEmail() {
@@ -568,12 +582,25 @@ const App = {
     toast('Berhasil keluar', 'info');
   },
 
-  showUserMenu() { toast(`${state.user?.email} — ${state.user?.isAdmin ? 'Admin' : 'Pembeli'}`, 'info'); },
+  showUserMenu() { toast(`${state.user?.email} — ${state.user?.isAdmin ? '👑 Admin' : '👤 Pembeli'}`, 'info'); },
+  
+  goBack() {
+    if (state.currentPage === 'store') return;
+    this.navigate('store');
+  },
+
   navigate(page) {
     if (page === 'admin' && !state.user?.isAdmin) { toast('Hanya untuk admin', 'error'); return; }
     state.currentPage = page;
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
+    
+    // Sembunyikan tombol back di navbar jika di store
+    const backBtn = document.getElementById('back-btn');
+    if (backBtn) {
+      backBtn.style.display = page === 'store' ? 'none' : 'flex';
+    }
+    
     if (page === 'orders') this.loadUserOrders();
     if (page === 'admin') this.loadAdminData();
   },
@@ -764,8 +791,11 @@ const App = {
 
   renderUserOrders() {
     const list = document.getElementById('user-orders-list');
-    if (!state.orders.length) { list.innerHTML = '<div class="empty-state"><span class="emo">📦</span><h3>Belum ada pesanan</h3><button class="btn btn-primary" onclick="App.navigate(\'store\')">Belanja Sekarang</button></div>'; return; }
-    list.innerHTML = state.orders.map(o => `<div class="order-card"><div class="order-card-top"><div><div class="order-num">${o.order_number}</div><div class="order-date">${formatDate(o.created_at)}</div></div><span class="badge ${getBadgeClass(o.status)}">${statusLabel(o.status)}</span></div><div class="order-chips">${(o.order_items || []).map(i => `<span class="order-chip">${i.product_name} ×${i.quantity}</span>`).join('')}</div><div style="font-size:13px;margin:10px 0">📞 ${o.customer_phone || '-'}<br>📍 ${o.customer_address || '-'}<br>💳 ${o.payment_method || 'Transfer'} ${o.payment_proof_url ? `<br>📷 <span class="img-zoom" onclick="App.showImage('${o.payment_proof_url}')">Lihat Bukti Transfer</span>` : ''}${o.rejected_reason ? `<br>❌ Alasan ditolak: ${o.rejected_reason}` : ''}</div><div class="order-foot"><div class="order-amt">${formatRp(o.total_amount)}</div></div></div>`).join('');
+    if (!state.orders.length) { 
+      list.innerHTML = '<div class="empty-state"><span class="emo">📦</span><h3>Belum ada pesanan</h3><p>Silakan belanja dulu ya!</p><button class="btn btn-primary" onclick="App.navigate(\'store\')">🛍️ Belanja Sekarang</button></div>'; 
+      return; 
+    }
+    list.innerHTML = state.orders.map(o => `<div class="order-card"><div class="order-card-top"><div><div class="order-num">${o.order_number}</div><div class="order-date">${formatDate(o.created_at)}</div></div><span class="badge ${getBadgeClass(o.status)}">${statusLabel(o.status)}</span></div><div class="order-chips">${(o.order_items || []).map(i => `<span class="order-chip">${i.product_name} ×${i.quantity}</span>`).join('')}</div><div class="detail-info">📞 ${o.customer_phone || '-'}<br>📍 ${o.customer_address || '-'}<br>💳 ${o.payment_method || 'Transfer'} ${o.payment_proof_url ? `<br>📷 <span class="img-zoom" onclick="App.showImage('${o.payment_proof_url}')">🖼️ Lihat Bukti Transfer</span>` : ''}${o.rejected_reason ? `<br>❌ Alasan ditolak: ${o.rejected_reason}` : ''}</div><div class="order-foot"><div class="order-amt">${formatRp(o.total_amount)}</div></div></div>`).join('');
   },
 
   showImage(url) { document.getElementById('zoom-image').src = url; document.getElementById('image-modal').classList.add('open'); },
