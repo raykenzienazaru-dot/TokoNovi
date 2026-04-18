@@ -1066,8 +1066,8 @@ select.form-input { cursor: pointer; }
 <!-- ═══════════════════ LOADER ═══════════════════ -->
 <div id="app-loader">
   <div class="loader-wordmark">
-    <div class="loader-icon">🛍️</div>
-    <div class="loader-name">TokoKu</div>
+    <div class="loader-icon">🍣</div>
+    <div class="loader-name">Novi.Shope</div>
   </div>
   <div class="loader-bar"><div class="loader-bar-fill"></div></div>
 </div>
@@ -1118,25 +1118,19 @@ select.form-input { cursor: pointer; }
       <div class="bank-row">
         <span class="bank-logo">BCA</span>
         <div style="text-align:right">
-          <div class="bank-number">123 456 7890</div>
-          <div class="bank-owner">a.n TokoKu Official</div>
+          <div class="bank-number">6470476573</div>
+          <div class="bank-owner">Novianti</div>
         </div>
       </div>
       <div class="bank-row">
-        <span class="bank-logo">BRI</span>
+        <span class="bank-logo">Mandiri</span>
         <div style="text-align:right">
-          <div class="bank-number">9876 5432 1098</div>
-          <div class="bank-owner">a.n TokoKu Official</div>
+          <div class="bank-number">118-000-984-945-5</div>
+          <div class="bank-owner">Novianti</div>
         </div>
       </div>
-      <div class="bank-row">
-        <span class="bank-logo">MANDIRI</span>
-        <div style="text-align:right">
-          <div class="bank-number">123-00-1234567-8</div>
-          <div class="bank-owner">a.n TokoKu Official</div>
-        </div>
-      </div>
-      <div class="bank-note">⚠️ Transfer tepat sesuai total, kemudian upload bukti di bawah.</div>
+    
+      <div class="bank-note"> Transfer tepat sesuai total, kemudian upload bukti di bawah.</div>
     </div>
 
     <div class="form-group"><label class="form-label required">Nama Lengkap</label><input class="form-input" id="checkout-name" placeholder="Nama penerima paket"/></div>
@@ -1153,7 +1147,7 @@ select.form-input { cursor: pointer; }
       <div class="upload-zone" id="upload-zone">
         <input type="file" id="payment-proof" accept="image/*" onchange="App.previewPaymentProof(this)"/>
         <div id="proof-placeholder">
-          <div class="upload-zone-icon">📤</div>
+          <div class="upload-zone-icon"></div>
           <div class="upload-zone-text">Klik atau seret foto bukti transfer</div>
           <div class="upload-zone-hint">JPG, PNG, WEBP · Maks. 5MB</div>
         </div>
@@ -1222,8 +1216,8 @@ select.form-input { cursor: pointer; }
       ← <span class="desktop-only">Kembali</span>
     </button>
     <div class="nav-brand" onclick="App.navigate('store')">
-      <div class="nav-brand-icon">🛍️</div>
-      <div class="nav-brand-name">TokoKu</div>
+      <div class="nav-brand-icon">🍣</div>
+      <div class="nav-brand-name">Novi.Shope</div>
     </div>
   </div>
 
@@ -1256,13 +1250,13 @@ select.form-input { cursor: pointer; }
 <!-- ═══════════════════ MOBILE MENU ═══════════════════ -->
 <div class="mobile-menu" id="mobile-menu">
   <div class="mob-nav-item" onclick="App.navigate('store')">
-    <span class="mob-icon">🏠</span> Beranda
+    <span class="mob-icon"></span> Beranda
   </div>
   <div class="mob-nav-item" id="mobile-admin-btn" style="display:none" onclick="App.navigate('admin')">
     <span class="mob-icon">⚙️</span> Dashboard Admin
   </div>
   <div class="mob-nav-item" onclick="App.navigate('orders')">
-    <span class="mob-icon">📦</span> Pesanan Saya
+    <span class="mob-icon"></span> Pesanan Saya
   </div>
   <div class="mob-nav-item" onclick="App.openCart()">
     <span class="mob-icon">🛒</span> Keranjang
@@ -1278,9 +1272,9 @@ select.form-input { cursor: pointer; }
 <div id="page-auth" class="active">
   <div class="auth-card">
     <div class="auth-brand">
-      <div class="auth-icon">🛍️</div>
+      <div class="auth-icon">🍣</div>
       <div>
-        <div class="auth-title">TokoKu</div>
+        <div class="auth-title">Novi.Shope</div>
         <div class="auth-subtitle">Belanja mudah, hemat, dan terpercaya</div>
       </div>
     </div>
@@ -1290,7 +1284,7 @@ select.form-input { cursor: pointer; }
       <input type="email" class="auth-input" id="email-input" placeholder="nama@email.com" onkeydown="if(event.key==='Enter')App.loginEmail()"/>
     </div>
     <button class="auth-submit" id="login-btn" onclick="App.loginEmail()">Masuk Sekarang →</button>
-    <div class="auth-note">💡 Tidak perlu daftar atau password. Cukup masukkan email dan langsung mulai belanja.</div>
+    <div class="auth-note"> Tidak perlu daftar atau password. Cukup masukkan email dan langsung mulai belanja.</div>
   </div>
 </div>
 
@@ -1300,9 +1294,9 @@ select.form-input { cursor: pointer; }
   <div class="store-hero">
     <div class="hero-bg"></div>
     <div class="hero-content">
-      <div class="hero-eyebrow">✨ Koleksi Terbaru 2025</div>
+      <div class="hero-eyebrow"> Makanan enak untuk kita</div>
       <h1 class="hero-h1">Belanja Lebih Cerdas,<br><em>Harga Lebih Hemat</em></h1>
-      <p class="hero-p">Temukan ribuan produk pilihan terbaik dengan harga terjangkau. Pesan sekarang, dikirim cepat ke seluruh Indonesia.</p>
+      <p class="hero-p">Temukan ribuan makanan pilihan terbaik dengan harga terjangkau, Pesan sekarang.</p>
       <div class="hero-cta">
         <button class="btn btn-primary" onclick="document.getElementById('products-grid').scrollIntoView({behavior:'smooth'})">
           Lihat Produk →
@@ -1320,7 +1314,7 @@ select.form-input { cursor: pointer; }
         </div>
       </div>
     </div>
-    <div class="hero-visual">🛍️</div>
+    <div class="hero-visual">🍣</div>
   </div>
 
   <!-- Search + Filter -->
@@ -1331,7 +1325,7 @@ select.form-input { cursor: pointer; }
     </div>
   </div>
   <div class="cat-strip" id="category-tabs">
-    <button class="cat-chip active" onclick="App.filterCategory('semua',this)">🏷️ Semua</button>
+    <button class="cat-chip active" onclick="App.filterCategory('semua',this)"> Semua</button>
   </div>
 
   <!-- Products -->
@@ -1359,12 +1353,12 @@ select.form-input { cursor: pointer; }
         <span class="admin-brand-icon">⚙️</span>
         <span class="admin-brand-name">Admin Panel</span>
       </div>
-      <button class="admin-nav-btn active" onclick="App.adminTab('dashboard',this)"><span class="nav-icon">📊</span> Dashboard</button>
+      <button class="admin-nav-btn active" onclick="App.adminTab('dashboard',this)"><span class="nav-icon"></span> Dashboard</button>
       <button class="admin-nav-btn" onclick="App.adminTab('orders',this)"><span class="nav-icon">🛒</span> Pesanan Masuk</button>
-      <button class="admin-nav-btn" onclick="App.adminTab('products',this)"><span class="nav-icon">📦</span> Daftar Produk</button>
+      <button class="admin-nav-btn" onclick="App.adminTab('products',this)"><span class="nav-icon"></span> Daftar Produk</button>
       <button class="admin-nav-btn" onclick="App.adminTab('add-product',this)"><span class="nav-icon">➕</span> Tambah Produk</button>
       <div style="margin-top:auto;padding-top:16px;border-top:1px solid var(--border);margin-top:16px">
-        <button class="admin-nav-btn" onclick="App.navigate('store')"><span class="nav-icon">🏠</span> Kembali ke Toko</button>
+        <button class="admin-nav-btn" onclick="App.navigate('store')"><span class="nav-icon"></span> Kembali ke Toko</button>
       </div>
     </aside>
 
@@ -1373,7 +1367,7 @@ select.form-input { cursor: pointer; }
       <div id="admin-tab-dashboard" class="admin-tab active">
         <div class="section-header" style="margin-bottom:24px">
           <div class="section-title">Dashboard</div>
-          <button class="btn btn-secondary btn-sm" onclick="App.loadAdminData()">🔄 Refresh</button>
+          <button class="btn btn-secondary btn-sm" onclick="App.loadAdminData()"> Refresh</button>
         </div>
         <div class="stats-grid" id="admin-stats"></div>
         <div class="section-header" style="margin-bottom:16px">
@@ -1386,14 +1380,14 @@ select.form-input { cursor: pointer; }
       <div id="admin-tab-orders" class="admin-tab">
         <div class="section-header" style="margin-bottom:20px">
           <div class="section-title">Manajemen Pesanan</div>
-          <button class="btn btn-secondary btn-sm" onclick="App.loadAdminOrders()">🔄 Refresh</button>
+          <button class="btn btn-secondary btn-sm" onclick="App.loadAdminOrders()"> Refresh</button>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px" id="order-filter-tabs">
           <button class="cat-chip active" onclick="App.filterAdminOrders('all',this)">Semua</button>
-          <button class="cat-chip" onclick="App.filterAdminOrders('pending',this)">⏳ Menunggu</button>
-          <button class="cat-chip" onclick="App.filterAdminOrders('paid',this)">✅ Dibayar</button>
-          <button class="cat-chip" onclick="App.filterAdminOrders('rejected',this)">❌ Ditolak</button>
-          <button class="cat-chip" onclick="App.filterAdminOrders('completed',this)">🎉 Selesai</button>
+          <button class="cat-chip" onclick="App.filterAdminOrders('pending',this)"> Menunggu</button>
+          <button class="cat-chip" onclick="App.filterAdminOrders('paid',this)">Dibayar</button>
+          <button class="cat-chip" onclick="App.filterAdminOrders('rejected',this)"> Ditolak</button>
+          <button class="cat-chip" onclick="App.filterAdminOrders('completed',this)"> Selesai</button>
         </div>
         <div id="admin-orders-list"></div>
       </div>
@@ -1428,7 +1422,7 @@ select.form-input { cursor: pointer; }
             <div class="upload-zone">
               <input type="file" id="product-image-input" accept="image/*" onchange="App.previewProductImage(this)"/>
               <div id="upload-placeholder">
-                <div class="upload-zone-icon">🖼️</div>
+                <div class="upload-zone-icon"></div>
                 <div class="upload-zone-text">Klik untuk upload foto produk</div>
                 <div class="upload-zone-hint">JPG, PNG, WEBP · Maks. 5MB</div>
               </div>
@@ -1454,7 +1448,7 @@ select.form-input { cursor: pointer; }
 </div>
 
 <!-- ═══════════════════ AI HELPER ═══════════════════ -->
-<div id="ai-helper">
+<!-- <div id="ai-helper">
   <div class="ai-chat-panel" id="ai-panel">
     <div class="ai-chat-header">
       <div class="ai-chat-avatar">🤖</div>
@@ -1481,7 +1475,7 @@ select.form-input { cursor: pointer; }
     </div>
   </div>
   <button class="ai-bubble-btn" onclick="AIHelper.toggle()" title="Tanya Asisten">🤖</button>
-</div>
+</div>-->
 
 <script>
 /* ══════════════════════════════════════════════════
@@ -1491,7 +1485,7 @@ const CONFIG = {
   SUPABASE_URL: 'https://vtozhwkvhtjfytmqdxkf.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_6eb_n7WUi2AZascv7bnwNQ_D75nSZsf',
   ADMIN_EMAILS: ['raykenzienazaru@gmail.com', 'noviantinovianti170@gmail.com'],
-  ANTHROPIC_API: 'https://api.anthropic.com/v1/messages',
+  
 };
 
 const { createClient } = supabase;
