@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ecomers - Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="./style.css"/>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="#dashboard" data-page-link="dashboard">
+      <span class="brand-icon"><i data-lucide="shopping-cart"></i></span>
+      <span>
+        <strong>Ecomers</strong>
+        <small>ADMIN</small>
+      </span>
+    </a>
+
+    <nav class="side-nav" aria-label="Menu admin">
+      <button class="nav-item active" type="button" data-page-link="dashboard">
+        <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+      </button>
+      <button class="nav-item" type="button" data-page-link="barang">
+        <i data-lucide="package"></i><span>Barang</span>
+      </button>
+      <button class="nav-item" type="button" data-page-link="diskon">
+        <i data-lucide="badge-percent"></i><span>Diskon</span>
+      </button>
+      <button class="nav-item" type="button" data-page-link="pesanan">
+        <i data-lucide="shopping-cart"></i><span>Pesanan</span>
+      </button>
+      <button class="nav-item" type="button" data-page-link="pembayaran">
+        <i data-lucide="credit-card"></i><span>Pembayaran</span>
+      </button>
+      <button class="nav-item" type="button" data-page-link="persetujuan">
+        <i data-lucide="clipboard-check"></i><span>Persetujuan Barang</span>
+      </button>
+      <button class="nav-item" type="button" data-page-link="pelanggan">
+        <i data-lucide="users"></i><span>Pelanggan</span>
+      </button>
+      <button class="nav-item" type="button" data-page-link="laporan">
+        <i data-lucide="bar-chart-3"></i><span>Laporan</span>
+      </button>
+      <button class="nav-item" type="button" data-page-link="pengaturan">
+        <i data-lucide="settings"></i><span>Pengaturan</span>
+      </button>
+    </nav>
+
+    <a class="logout" id="logoutLink" href="../login/index.html">
+      <i data-lucide="log-out"></i><span>Keluar</span>
+    </a>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <main class="shell">
+    <header class="topbar">
+      <button class="icon-btn" id="menuButton" type="button" aria-label="Buka menu">
+        <i data-lucide="menu"></i>
+      </button>
+      <div class="admin-profile">
+        <span class="avatar"><i data-lucide="user"></i></span>
+        <span>
+          <strong>Admin</strong>
+          <small>Administrator</small>
+        </span>
+      </div>
+    </header>
+
+    <section class="page active" id="page-dashboard">
+      <div class="page-head">
+        <div>
+          <h1>Dashboard</h1>
+        </div>
+        <div class="toolbar">
+          <select class="select">
+            <option>Bulan ini</option>
+            <option>Minggu ini</option>
+            <option>Tahun ini</option>
+          </select>
+          <select class="select wide">
+            <option>01 Mei 2024 - 31 Mei 2024</option>
+            <option>01 Jun 2024 - 30 Jun 2024</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="metric-grid">
+        <article class="metric-card">
+          <span class="metric-icon blue"><i data-lucide="shopping-bag"></i></span>
+          <p>Total Penjualan</p>
+          <strong>Rp 125.750.000</strong>
+          <small class="up">+ 12.5%</small>
+          <em>Dibanding bulan lalu</em>
+        </article>
+        <article class="metric-card">
+          <span class="metric-icon green"><i data-lucide="package-check"></i></span>
+          <p>Total Pesanan</p>
+          <strong>1.250</strong>
+          <small class="up">+ 8.2%</small>
+          <em>Dibanding bulan lalu</em>
+        </article>
+        <article class="metric-card">
+          <span class="metric-icon purple"><i data-lucide="users"></i></span>
+          <p>Total Pelanggan</p>
+          <strong>980</strong>
+          <small class="up">+ 5.7%</small>
+          <em>Dibanding bulan lalu</em>
+        </article>
+        <article class="metric-card">
+          <span class="metric-icon orange"><i data-lucide="circle-dollar-sign"></i></span>
+          <p>Pendapatan Bersih</p>
+          <strong>Rp 98.450.000</strong>
+          <small class="up">+ 10.3%</small>
+          <em>Dibanding bulan lalu</em>
+        </article>
+      </div>
+
+      <div class="dashboard-grid">
+        <section class="panel chart-panel">
+          <div class="panel-head">
+            <h2>Grafik Penjualan</h2>
+          </div>
+          <canvas id="salesChart" height="260" aria-label="Grafik penjualan bulan Mei"></canvas>
+          <div class="legend"><span></span> Penjualan (Rp)</div>
+        </section>
+
+        <section class="panel summary-panel">
+          <div class="panel-head">
+            <h2>Ringkasan</h2>
+          </div>
+          <dl class="summary-list">
+            <div><dt>Total Produk</dt><dd>350</dd></div>
+            <div><dt>Produk Aktif</dt><dd>320</dd></div>
+            <div><dt>Pesanan Baru</dt><dd>45</dd></div>
+            <div><dt>Pesanan Diproses</dt><dd>28</dd></div>
+            <div><dt>Pesanan Selesai</dt><dd>1.150</dd></div>
+            <div><dt>Pesanan Dibatalkan</dt><dd>27</dd></div>
+          </dl>
+        </section>
+      </div>
+    </section>
+
+    <section class="page" id="page-barang">
+      <div class="page-head compact">
+        <div>
+          <h1>Tambah Barang</h1>
+          <p class="breadcrumb"><span>Barang</span> / Tambah Barang</p>
+        </div>
+      </div>
+
+      <form class="product-form" id="productForm">
+        <section class="panel form-panel">
+          <div class="panel-head lined"><h2>Informasi Barang</h2></div>
+          <div class="form-grid">
+            <label class="field full">
+              <span>Nama Barang <b>*</b></span>
+              <input id="productName" type="text" placeholder="Masukkan nama barang" required/>
+            </label>
+            <label class="field full">
+              <span>Kategori <b>*</b></span>
+              <select id="productCategory" required>
+                <option value="">Pilih kategori</option>
+                <option value="fashion">Fashion</option>
+                <option value="elektronik">Elektronik</option>
+                <option value="aksesoris">Aksesoris</option>
+                <option value="makanan">Makanan</option>
+                <option value="minuman">Minuman</option>
+                <option value="rumah">Rumah</option>
+                <option value="umum">Umum</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Harga <b>*</b></span>
+              <div class="input-prefix"><span>Rp</span><input id="productPrice" type="number" min="0" placeholder="Masukkan harga" required/></div>
+            </label>
+            <label class="field">
+              <span>Stok <b>*</b></span>
+              <input id="productStock" type="number" min="0" placeholder="Masukkan stok" required/>
+            </label>
+            <label class="field full">
+              <span>Deskripsi</span>
+              <textarea id="productDescription" placeholder="Masukkan deskripsi barang"></textarea>
+            </label>
+          </div>
+          <input id="productId" type="hidden"/>
+        </section>
+
+        <section class="panel image-panel">
+          <div class="panel-head lined"><h2>Gambar Barang</h2></div>
+          <label class="drop-zone" for="productImage">
+            <input id="productImage" type="file" accept="image/png,image/jpeg,image/webp" multiple/>
+            <i data-lucide="cloud-upload"></i>
+            <strong>Klik atau drag & drop untuk upload gambar</strong>
+            <small>Format: JPG, PNG, WebP (Maks. 2MB)</small>
+          </label>
+          <p class="image-note">Maksimal 5 gambar</p>
+          <div class="image-slots">
+            <button class="image-slot" type="button">+</button>
+            <button class="image-slot" type="button">+</button>
+            <button class="image-slot" type="button">+</button>
+            <button class="image-slot" type="button">+</button>
+          </div>
+        </section>
+
+        <div class="form-actions">
+          <button class="btn secondary" type="reset">Batal</button>
+          <button class="btn primary" id="saveProductButton" type="submit">Simpan</button>
+        </div>
+      </form>
+
+      <section class="panel table-panel">
+        <div class="panel-head lined"><h2>Daftar Barang</h2></div>
+        <table>
+          <thead><tr><th>No</th><th>Barang</th><th>Kategori</th><th>Harga</th><th>Stok</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="productRows"></tbody>
+        </table>
+      </section>
+    </section>
+
+    <section class="page" id="page-diskon">
+      <div class="page-head">
+        <h1>Kelola Diskon</h1>
+        <button class="btn primary" id="addDiscountButton" type="button"><i data-lucide="plus"></i>Tambah Diskon</button>
+      </div>
+      <section class="panel table-panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Kode Diskon</th><th>Nama Diskon</th><th>Jenis</th><th>Nilai</th><th>Minimum Belanja</th><th>Periode</th><th>Status</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="discountRows">
+            <tr><td>DISKON10</td><td>Diskon 10%</td><td>Persentase</td><td>10%</td><td>Rp 100.000</td><td>01 Mei 2024 - 31 Mei 2024</td><td><span class="status success">Aktif</span></td><td class="actions"><button><i data-lucide="pencil"></i></button><button><i data-lucide="trash-2"></i></button></td></tr>
+            <tr><td>POTONG20K</td><td>Potongan 20K</td><td>Nominal</td><td>Rp 20.000</td><td>Rp 150.000</td><td>01 Mei 2024 - 15 Mei 2024</td><td><span class="status success">Aktif</span></td><td class="actions"><button><i data-lucide="pencil"></i></button><button><i data-lucide="trash-2"></i></button></td></tr>
+            <tr><td>HEMAT50K</td><td>Hemat 50K</td><td>Nominal</td><td>Rp 50.000</td><td>Rp 300.000</td><td>10 Mei 2024 - 31 Mei 2024</td><td><span class="status success">Aktif</span></td><td class="actions"><button><i data-lucide="pencil"></i></button><button><i data-lucide="trash-2"></i></button></td></tr>
+            <tr><td>DISKON15</td><td>Diskon 15%</td><td>Persentase</td><td>15%</td><td>Rp 200.000</td><td>01 Apr 2024 - 30 Apr 2024</td><td><span class="status danger">Tidak Aktif</span></td><td class="actions"><button><i data-lucide="pencil"></i></button><button><i data-lucide="trash-2"></i></button></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination"><button>&lt;</button><button class="active">1</button><button>2</button><button>&gt;</button></div>
+      </section>
+    </section>
+
+    <section class="page" id="page-pesanan">
+      <div class="page-head"><h1>Pesanan</h1></div>
+      <section class="panel table-panel">
+        <table>
+          <thead><tr><th>No</th><th>Kode Pesanan</th><th>Pelanggan</th><th>Total</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+          <tbody id="orderRows">
+            <tr><td>1</td><td>ORD240520001</td><td>Budi Santoso</td><td>Rp 250.000</td><td><span class="status warning">Diproses</span></td><td>20 Mei 2024</td><td class="actions"><button><i data-lucide="eye"></i></button></td></tr>
+            <tr><td>2</td><td>ORD240520002</td><td>Siti Aisyah</td><td>Rp 150.000</td><td><span class="status info">Dikirim</span></td><td>20 Mei 2024</td><td class="actions"><button><i data-lucide="eye"></i></button></td></tr>
+            <tr><td>3</td><td>ORD240520003</td><td>Dewi Lestari</td><td>Rp 350.000</td><td><span class="status success">Selesai</span></td><td>19 Mei 2024</td><td class="actions"><button><i data-lucide="eye"></i></button></td></tr>
+          </tbody>
+        </table>
+      </section>
+    </section>
+
+    <section class="page" id="page-pembayaran">
+      <div class="page-head compact"><h1>Pembayaran</h1></div>
+      <div class="tabs" data-tabs>
+        <button class="active" data-filter="all">Semua</button>
+        <button data-filter="pending">Menunggu Konfirmasi</button>
+        <button data-filter="paid">Dibayar</button>
+        <button data-filter="rejected">Ditolak</button>
+        <button data-filter="completed">Selesai</button>
+      </div>
+      <section class="panel table-panel">
+        <table>
+          <thead><tr><th>No</th><th>Kode Pembayaran</th><th>Pesanan</th><th>Pelanggan</th><th>Metode</th><th>Total</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+          <tbody id="paymentRows">
+            <tr data-status="Dibayar"><td>1</td><td>PAY240520001</td><td>ORD240520001</td><td>Budi Santoso</td><td>Transfer Bank</td><td>Rp 250.000</td><td><span class="status success">Dibayar</span></td><td>20 Mei 2024 10:45</td><td class="actions"><button><i data-lucide="eye"></i></button></td></tr>
+            <tr data-status="Menunggu Pembayaran"><td>2</td><td>PAY240520002</td><td>ORD240520002</td><td>Siti Aisyah</td><td>E-Wallet</td><td>Rp 150.000</td><td><span class="status warning">Menunggu Pembayaran</span></td><td>20 Mei 2024 10:30</td><td class="actions"><button><i data-lucide="eye"></i></button></td></tr>
+            <tr data-status="Dibayar"><td>3</td><td>PAY240520003</td><td>ORD240520003</td><td>Dewi Lestari</td><td>Virtual Account</td><td>Rp 350.000</td><td><span class="status success">Dibayar</span></td><td>20 Mei 2024 09:15</td><td class="actions"><button><i data-lucide="eye"></i></button></td></tr>
+            <tr data-status="Gagal"><td>4</td><td>PAY240520004</td><td>ORD240520004</td><td>Rizky Pratama</td><td>Transfer Bank</td><td>Rp 75.000</td><td><span class="status danger">Gagal</span></td><td>20 Mei 2024 08:50</td><td class="actions"><button><i data-lucide="eye"></i></button></td></tr>
+            <tr data-status="Dibayar"><td>5</td><td>PAY240520005</td><td>ORD240520005</td><td>Agung Setiawan</td><td>E-Wallet</td><td>Rp 200.000</td><td><span class="status success">Dibayar</span></td><td>19 Mei 2024 16:20</td><td class="actions"><button><i data-lucide="eye"></i></button></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination"><button>&lt;</button><button class="active">1</button><button>2</button><button>3</button><button>&gt;</button></div>
+      </section>
+    </section>
+
+    <section class="page" id="page-persetujuan">
+      <div class="page-head compact"><h1>Persetujuan Barang</h1></div>
+      <div class="tabs">
+        <button class="active">Menunggu Persetujuan (5)</button>
+        <button>Disetujui</button>
+        <button>Ditolak</button>
+      </div>
+      <section class="panel table-panel">
+        <table>
+          <thead><tr><th>No</th><th>Nama Barang</th><th>Penjual</th><th>Tanggal Pengajuan</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="approvalRows">
+            <tr><td>1</td><td><span class="product-cell"><span class="thumb dark"></span>Sepatu Sneakers Putih</span></td><td>Andi Store</td><td>20 Mei 2024 10:30</td><td><span class="status warning">Menunggu</span></td><td class="approve-actions"><button class="approve">Setujui</button><button class="reject">Tolak</button></td></tr>
+            <tr><td>2</td><td><span class="product-cell"><span class="thumb gray"></span>Tas Ransel Pria</span></td><td>Budi Collection</td><td>20 Mei 2024 09:15</td><td><span class="status warning">Menunggu</span></td><td class="approve-actions"><button class="approve">Setujui</button><button class="reject">Tolak</button></td></tr>
+            <tr><td>3</td><td><span class="product-cell"><span class="thumb light"></span>Jam Tangan Analog</span></td><td>Citra Watch</td><td>19 Mei 2024 16:45</td><td><span class="status warning">Menunggu</span></td><td class="approve-actions"><button class="approve">Setujui</button><button class="reject">Tolak</button></td></tr>
+            <tr><td>4</td><td><span class="product-cell"><span class="thumb dark"></span>Kemeja Flanel Pria</span></td><td>Doni Fashion</td><td>19 Mei 2024 14:20</td><td><span class="status warning">Menunggu</span></td><td class="approve-actions"><button class="approve">Setujui</button><button class="reject">Tolak</button></td></tr>
+            <tr><td>5</td><td><span class="product-cell"><span class="thumb gray"></span>Headset Gaming</span></td><td>Eko Elektronik</td><td>18 Mei 2024 11:05</td><td><span class="status warning">Menunggu</span></td><td class="approve-actions"><button class="approve">Setujui</button><button class="reject">Tolak</button></td></tr>
+          </tbody>
+        </table>
+      </section>
+    </section>
+
+    <section class="page" id="page-pelanggan">
+      <div class="page-head"><h1>Pelanggan</h1></div>
+      <section class="panel table-panel">
+        <table>
+          <thead><tr><th>No</th><th>Nama</th><th>Email</th><th>Total Pesanan</th><th>Total Belanja</th><th>Status</th></tr></thead>
+          <tbody id="customerRows">
+            <tr><td>1</td><td>Budi Santoso</td><td>budi@email.com</td><td>18</td><td>Rp 4.500.000</td><td><span class="status success">Aktif</span></td></tr>
+            <tr><td>2</td><td>Siti Aisyah</td><td>siti@email.com</td><td>12</td><td>Rp 2.250.000</td><td><span class="status success">Aktif</span></td></tr>
+            <tr><td>3</td><td>Dewi Lestari</td><td>dewi@email.com</td><td>7</td><td>Rp 1.750.000</td><td><span class="status warning">Baru</span></td></tr>
+          </tbody>
+        </table>
+      </section>
+    </section>
+
+    <section class="page" id="page-laporan">
+      <div class="page-head"><h1>Laporan</h1></div>
+      <div class="metric-grid">
+        <article class="metric-card"><p>Omzet Bulan Ini</p><strong id="reportRevenue">Rp 0</strong><small class="up" id="reportRevenueNote">Data Supabase</small></article>
+        <article class="metric-card"><p>Produk Terjual</p><strong id="reportItemsSold">0</strong><small class="up">Dari order item</small></article>
+        <article class="metric-card"><p>Pesanan Ditolak</p><strong id="reportRejected">0</strong><small class="down">Refund / batal</small></article>
+      </div>
+      <section class="panel table-panel">
+        <table>
+          <thead><tr><th>Periode</th><th>Pesanan</th><th>Penjualan</th><th>Biaya Admin</th><th>Pendapatan Bersih</th></tr></thead>
+          <tbody id="reportRows">
+            <tr><td>Mei 2024</td><td>1.250</td><td>Rp 125.750.000</td><td>Rp 27.300.000</td><td>Rp 98.450.000</td></tr>
+            <tr><td>April 2024</td><td>1.080</td><td>Rp 111.700.000</td><td>Rp 24.150.000</td><td>Rp 87.550.000</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </section>
+
+    <section class="page" id="page-pengaturan">
+      <div class="page-head"><h1>Pengaturan</h1></div>
+      <section class="panel form-panel settings-panel">
+        <div class="panel-head lined"><h2>Profil Admin</h2></div>
+        <div class="form-grid">
+          <label class="field"><span>Nama</span><input value="Admin"/></label>
+          <label class="field"><span>Email</span><input value="admin@ecomers.local"/></label>
+          <label class="field full"><span>Nama Toko</span><input value="Ecomers"/></label>
+        </div>
+        <div class="form-actions inside">
+          <button class="btn primary" type="button">Simpan Perubahan</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Novi.Shope - Belanja</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="./style.css"/>
+</head>
+<body>
+  <div id="app-loader" class="loader-screen">
+    <div class="loader-logo">
+      <i data-lucide="shopping-bag"></i>
+      <span>Novi.Shope</span>
+    </div>
+    <div class="loader-line"><span></span></div>
+  </div>
+
+  <div id="toast-container"></div>
+  <div class="cart-overlay" id="cart-overlay" onclick="App.closeCart()"></div>
+
+  <aside id="cart-sidebar" aria-label="Keranjang">
+    <div class="cart-header">
+      <div>
+        <p class="eyebrow">Keranjang</p>
+        <h2>Belanjaan Kamu</h2>
+      </div>
+      <button class="icon-btn" onclick="App.closeCart()" aria-label="Tutup keranjang"><i data-lucide="x"></i></button>
+    </div>
+    <div class="cart-body" id="cart-items-list"></div>
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <span id="cart-count-label">0 item</span>
+        <strong id="cart-total-display">Rp 0</strong>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="App.openCheckoutModal()">
+        <i data-lucide="credit-card"></i>
+        Checkout
+      </button>
+    </div>
+  </aside>
+
+  <div class="modal-overlay" id="checkout-modal">
+    <div class="modal checkout-modal">
+      <button class="icon-btn modal-close" onclick="App.closeModal('checkout-modal')" aria-label="Tutup checkout"><i data-lucide="x"></i></button>
+      <h2>Checkout</h2>
+      <div class="bank-info-card">
+        <div class="bank-card-title">
+          <i data-lucide="landmark"></i>
+          Transfer Pembayaran
+        </div>
+        <div class="bank-row">
+          <span>BCA</span>
+          <strong>6470476573</strong>
+          <small>Novianti</small>
+        </div>
+        <div class="bank-row">
+          <span>Mandiri</span>
+          <strong>118-000-984-945-5</strong>
+          <small>Novianti</small>
+        </div>
+      </div>
+
+      <div class="checkout-grid">
+        <label class="form-group">
+          <span>Nama Lengkap</span>
+          <input class="form-input" id="checkout-name" placeholder="Nama penerima"/>
+        </label>
+        <label class="form-group">
+          <span>No. WhatsApp</span>
+          <input class="form-input" id="checkout-phone" placeholder="08xxxxxxxxxx" type="tel"/>
+        </label>
+      </div>
+      <label class="form-group">
+        <span>Alamat Pengiriman</span>
+        <textarea class="form-input" id="checkout-address" rows="3" placeholder="Jalan, RT/RW, kecamatan, kota, kode pos"></textarea>
+      </label>
+      <label class="form-group">
+        <span>Metode Transfer</span>
+        <select class="form-input" id="checkout-bank">
+          <option value="BCA">BCA - 6470476573</option>
+          <option value="MANDIRI">Mandiri - 118-000-984-945-5</option>
+        </select>
+      </label>
+      <label class="form-group">
+        <span>Bukti Transfer</span>
+        <div class="upload-zone">
+          <input type="file" id="payment-proof" accept="image/*" onchange="App.previewPaymentProof(this)"/>
+          <div id="proof-placeholder" class="upload-placeholder">
+            <i data-lucide="image-up"></i>
+            <strong>Upload bukti transfer</strong>
+            <small>JPG, PNG, WEBP maksimal 5MB</small>
+          </div>
+          <img id="proof-preview" class="upload-preview-img hidden" alt="Preview bukti transfer"/>
+        </div>
+      </label>
+      <label class="form-group">
+        <span>Catatan</span>
+        <input class="form-input" id="checkout-notes" placeholder="Warna, ukuran, atau instruksi khusus"/>
+      </label>
+      <div class="pay-summary">
+        <span>Total Pembayaran</span>
+        <strong id="checkout-total">Rp 0</strong>
+      </div>
+      <button class="btn btn-primary btn-full" id="submit-order-btn" onclick="App.submitOrder()">
+        <i data-lucide="send"></i>
+        Kirim Pesanan
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="order-modal">
+    <div class="modal">
+      <button class="icon-btn modal-close" onclick="App.closeModal('order-modal')" aria-label="Tutup produk"><i data-lucide="x"></i></button>
+      <div class="order-prod-preview">
+        <div class="order-prod-img" id="modal-product-img"></div>
+        <div class="order-prod-info">
+          <p id="modal-product-category">Kategori</p>
+          <h2 id="modal-product-name">Produk</h2>
+          <strong id="modal-product-price">Rp 0</strong>
+          <small id="modal-product-stock">Stok tersedia</small>
+        </div>
+      </div>
+      <div class="qty-section">
+        <div>
+          <span>Jumlah</span>
+          <small id="modal-qty-info">maks. 1</small>
+        </div>
+        <div class="qty-wrap">
+          <button onclick="App.changeQty(-1)" aria-label="Kurangi">-</button>
+          <strong id="modal-qty">1</strong>
+          <button onclick="App.changeQty(1)" aria-label="Tambah">+</button>
+        </div>
+      </div>
+      <div class="pay-summary">
+        <span>Subtotal</span>
+        <strong id="modal-total">Rp 0</strong>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="App.addToCart()">
+        <i data-lucide="shopping-cart"></i>
+        Tambah ke Keranjang
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-overlay image-modal" id="image-modal" onclick="App.closeModal('image-modal')">
+    <div class="image-viewer" onclick="event.stopPropagation()">
+      <button class="icon-btn modal-close" onclick="App.closeModal('image-modal')" aria-label="Tutup gambar"><i data-lucide="x"></i></button>
+      <img id="zoom-image" alt="Bukti transfer"/>
+    </div>
+  </div>
+
+  <main id="page-auth" class="auth-page page">
+    <section class="auth-panel">
+      <div class="brand-large">
+        <div class="brand-icon"><i data-lucide="shopping-bag"></i></div>
+        <div>
+          <span>Novi.Shope</span>
+          <small>Belanja praktis setiap hari</small>
+        </div>
+      </div>
+      <h1>Masuk ke akun kamu</h1>
+      <p>Gunakan email untuk melihat produk, checkout, dan memantau pesanan.</p>
+      <label class="form-group">
+        <span>Email</span>
+        <input class="form-input" id="email-input" type="email" placeholder="nama@email.com"/>
+      </label>
+      <button class="btn btn-primary btn-full" id="login-btn" onclick="App.loginEmail()">
+        Masuk Sekarang
+        <i data-lucide="arrow-right"></i>
+      </button>
+    </section>
+  </main>
+
+  <div id="app-shell" class="hidden">
+    <header id="navbar" class="app-header">
+      <button class="icon-btn desktop-hidden" onclick="App.navigate('store')" aria-label="Beranda"><i data-lucide="home"></i></button>
+      <div class="brand" onclick="App.navigate('store')">
+        <div class="brand-icon"><i data-lucide="shopping-bag"></i></div>
+        <strong>Novi.Shope</strong>
+      </div>
+      <div class="top-search">
+        <i data-lucide="search"></i>
+        <input id="nav-search-input" placeholder="Cari produk, kategori, atau brand..." oninput="App.filterFromNav(this.value)"/>
+      </div>
+      <nav class="desktop-nav">
+        <button class="nav-link active" data-nav="store" onclick="App.navigate('store')">Beranda</button>
+        <button class="nav-link" data-nav="orders" onclick="App.navigate('orders')">Pesanan</button>
+        <button class="nav-link" data-nav="account" onclick="App.navigate('account')">Akun</button>
+      </nav>
+      <button class="icon-btn cart-button" onclick="App.openCart()" aria-label="Keranjang">
+        <i data-lucide="shopping-cart"></i>
+        <span class="nav-badge hidden" id="cart-count">0</span>
+      </button>
+      <button class="user-pill" onclick="App.navigate('account')">
+        <span id="nav-avatar">U</span>
+        <strong id="nav-name">User</strong>
+      </button>
+    </header>
+
+    <section id="page-store" class="page active">
+      <div class="store-layout">
+        <aside class="category-rail" id="category-tabs">
+          <button class="cat-chip active" onclick="App.filterCategory('semua',this)"><i data-lucide="layout-grid"></i><span>Semua</span></button>
+        </aside>
+        <div class="store-main">
+          <section class="store-hero">
+            <div class="hero-copy">
+              <span>Diskon spesial minggu ini</span>
+              <h1>Belanja kebutuhan favorit lebih cepat.</h1>
+              <p>Produk pilihan, pembayaran transfer, dan riwayat pesanan dalam satu tempat.</p>
+              <button class="btn btn-light" onclick="document.getElementById('products-grid').scrollIntoView({behavior:'smooth'})">Belanja sekarang</button>
+            </div>
+            <div class="hero-product" aria-hidden="true">
+              <div class="hero-circle">
+                <i data-lucide="package-check"></i>
+              </div>
+            </div>
+          </section>
+
+          <div class="mobile-search">
+            <i data-lucide="search"></i>
+            <input id="search-input" placeholder="Cari produk..." oninput="App.filterProducts()"/>
+          </div>
+
+          <section class="quick-actions">
+            <button onclick="App.filterCategory('semua', document.querySelector('#category-tabs .cat-chip'))"><i data-lucide="sparkles"></i><span>Semua</span></button>
+            <button onclick="App.navigate('orders')"><i data-lucide="receipt-text"></i><span>Pesanan</span></button>
+            <button onclick="App.openCart()"><i data-lucide="shopping-cart"></i><span>Keranjang</span></button>
+            <button onclick="App.navigate('account')"><i data-lucide="user-round"></i><span>Akun</span></button>
+          </section>
+
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Rekomendasi</p>
+              <h2>Produk Pilihan</h2>
+            </div>
+            <span id="products-count">0 produk</span>
+          </div>
+          <div class="products-grid" id="products-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-orders" class="page">
+      <div class="page-head">
+        <button class="icon-btn" onclick="App.navigate('store')" aria-label="Kembali"><i data-lucide="arrow-left"></i></button>
+        <div>
+          <p class="eyebrow">Transaksi</p>
+          <h1>Pesanan Saya</h1>
+        </div>
+        <button class="btn btn-secondary" onclick="App.navigate('store')"><i data-lucide="plus"></i> Belanja</button>
+      </div>
+      <div class="orders-list" id="user-orders-list"></div>
+    </section>
+
+    <section id="page-account" class="page">
+      <div class="account-card">
+        <div class="account-hero">
+          <div class="account-avatar" id="mobile-avatar">U</div>
+          <div>
+            <h1 id="mobile-user-name">User</h1>
+            <p id="account-email">user@email.com</p>
+          </div>
+        </div>
+        <div class="account-stats">
+          <div><strong id="stat-products">0</strong><span>Produk</span></div>
+          <div><strong id="stat-orders">0</strong><span>Pesanan</span></div>
+          <div><strong id="mobile-cart-count">0</strong><span>Item Cart</span></div>
+        </div>
+        <div class="account-menu">
+          <button onclick="App.navigate('orders')"><i data-lucide="package"></i><span>Pesanan Saya</span><i data-lucide="chevron-right"></i></button>
+          <button onclick="App.openCart()"><i data-lucide="shopping-cart"></i><span>Keranjang</span><i data-lucide="chevron-right"></i></button>
+          <button onclick="App.signOut()"><i data-lucide="log-out"></i><span>Keluar</span><i data-lucide="chevron-right"></i></button>
+        </div>
+      </div>
+    </section>
+
+    <nav class="bottom-nav" aria-label="Navigasi mobile">
+      <button class="active" data-nav="store" onclick="App.navigate('store')"><i data-lucide="home"></i><span>Beranda</span></button>
+      <button onclick="App.focusSearch()"><i data-lucide="layout-grid"></i><span>Kategori</span></button>
+      <button class="bottom-cart" onclick="App.openCart()"><i data-lucide="shopping-cart"></i><span>Keranjang</span><em id="bottom-cart-count">0</em></button>
+      <button data-nav="orders" onclick="App.navigate('orders')"><i data-lucide="receipt-text"></i><span>Pesanan</span></button>
+      <button data-nav="account" onclick="App.navigate('account')"><i data-lucide="user-round"></i><span>Akun</span></button>
+    </nav>
+  </div>
+
+  <script src="../supabase-config.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>
