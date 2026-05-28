@@ -484,6 +484,18 @@ window.toggleProduct = async function toggleProduct(id, isActive) {
   renderDashboard();
 };
 
+window.deleteProduct = async function deleteProduct(id) {
+  if (!confirm("Hapus barang ini?")) return;
+  if (!requireDb()) return;
+  const { error } = await db.from("products").delete().eq("id", id);
+  if (error) return showToast("Gagal menghapus barang");
+  showToast("Barang berhasil dihapus");
+  await loadProducts();
+  renderProducts();
+  renderApprovals();
+  renderDashboard();
+};
+
 window.updateProductApproval = async function updateProductApproval(id, approvalStatus) {
   if (!requireDb()) return;
   const { error } = await db
@@ -578,6 +590,21 @@ document.querySelectorAll("[data-tabs] button").forEach((tab) => {
       item.classList.toggle("active", item === tab);
     });
     renderPayments();
+  });
+});
+
+// Approval tabs handling for Persetujuan Barang page
+document.querySelectorAll('#page-persetujuan .tabs button').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const txt = tab.textContent.toLowerCase();
+    let filter = 'pending';
+    if (txt.includes('setujui')) filter = 'approved';
+    else if (txt.includes('tolak')) filter = 'rejected';
+    state.approvalFilter = filter;
+    document.querySelectorAll('#page-persetujuan .tabs button').forEach(item => {
+      item.classList.toggle('active', item === tab);
+    });
+    renderApprovals();
   });
 });
 
