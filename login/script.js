@@ -8,6 +8,13 @@ const CONFIG = {
 const USER_KEY = 'tokoku_user_v2';
 const USER_APP_URL = '../user/index.html';
 const ADMIN_APP_URL = '../admin/index.html';
+
+// Admin emails that cannot self-register (hardcoded)
+const RESERVED_ADMIN_EMAILS = [
+  'raykenzienazaru@gmail.com',
+  'noviantinovianti170@gmail.com',
+];
+
 const hasSupabaseConfig = CONFIG.SUPABASE_URL
   && CONFIG.SUPABASE_ANON_KEY
   && !CONFIG.SUPABASE_URL.startsWith('ISI_')
@@ -25,8 +32,9 @@ function getUserFromStorage() {
   }
 }
 
-function setError(message) {
-  document.getElementById('login-error').textContent = message || '';
+function setError(id, message) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = message || '';
 }
 
 function buildUser(account) {
@@ -43,6 +51,38 @@ function getAppUrl(user) {
   return user?.isAdmin ? ADMIN_APP_URL : USER_APP_URL;
 }
 
+/* ===== TAB SWITCHING ===== */
+function switchTab(tabName) {
+  const tabLogin = document.getElementById('tab-login');
+  const tabRegister = document.getElementById('tab-register');
+  const panelLogin = document.getElementById('panel-login');
+  const panelRegister = document.getElementById('panel-register');
+  const indicator = document.getElementById('tab-indicator');
+
+  if (tabName === 'login') {
+    tabLogin.classList.add('active');
+    tabLogin.setAttribute('aria-selected', 'true');
+    tabRegister.classList.remove('active');
+    tabRegister.setAttribute('aria-selected', 'false');
+    panelLogin.classList.add('active');
+    panelRegister.classList.remove('active');
+    if (indicator) indicator.style.transform = 'translateX(0)';
+  } else {
+    tabRegister.classList.add('active');
+    tabRegister.setAttribute('aria-selected', 'true');
+    tabLogin.classList.remove('active');
+    tabLogin.setAttribute('aria-selected', 'false');
+    panelRegister.classList.add('active');
+    panelLogin.classList.remove('active');
+    if (indicator) indicator.style.transform = 'translateX(100%)';
+  }
+
+  // Clear errors
+  setError('login-error', '');
+  setError('register-error', '');
+}
+
+/* ===== LOGIN ===== */
 async function loginEmail(event) {
   event.preventDefault();
 
@@ -51,22 +91,22 @@ async function loginEmail(event) {
   const btn = document.getElementById('login-btn');
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    setError('Format email tidak valid');
+    setError('login-error', 'Format email tidak valid');
     return;
   }
 
   if (!password) {
-    setError('Password wajib diisi');
+    setError('login-error', 'Password wajib diisi');
     return;
   }
 
-  setError('');
+  setError('login-error', '');
   btn.disabled = true;
   btn.textContent = 'Masuk...';
 
   try {
     if (!db) {
-      setError('Isi SUPABASE_URL dan SUPABASE_ANON_KEY di supabase-config.js');
+      setError('login-error', 'Isi SUPABASE_URL dan SUPABASE_ANON_KEY di supabase-config.js');
       return;
     }
 
@@ -79,7 +119,7 @@ async function loginEmail(event) {
     const account = Array.isArray(data) ? data[0] : null;
 
     if (!account) {
-      setError('Email atau password salah');
+      setError('login-error', 'Email atau password salah');
       return;
     }
 
@@ -87,13 +127,111 @@ async function loginEmail(event) {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     window.location.href = getAppUrl(user);
   } catch (error) {
-    setError('Login gagal: ' + error.message);
+    setError('login-error', 'Login gagal: ' + error.message);
   } finally {
     btn.disabled = false;
     btn.textContent = 'Masuk';
   }
 }
 
+/* ===== REGISTER ===== */
+async function registerUser(event) {
+  event.preventDefault();
+
+  const name = document.getElementById('reg-name-input').value.trim();
+  const email = document.getElementById('reg-email-input').value.trim().toLowerCase();
+  const password = document.getElementById('reg-password-input').value;
+  const confirm = document.getElementById('reg-confirm-input').value;
+  const btn = document.getElementById('register-btn');
+
+  // Validation
+  if (!name) {
+    setError('register-error', 'Nama lengkap wajib diisi');
+    return;
+  }
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setError('register-error', 'Format email tidak valid');
+    return;
+  }
+
+  // Prevent registering with admin-reserved emails
+  if (RESERVED_ADMIN_EMAILS.includes(email)) {
+    setError('register-error', 'Email ini tidak dapat digunakan untuk pendaftaran');
+    return;
+  }
+
+  if (!password || password.length < 6) {
+    setError('register-error', 'Password minimal 6 karakter');
+    return;
+  }
+
+  if (password !== confirm) {
+    setError('register-error', 'Konfirmasi password tidak cocok');
+    return;
+  }
+
+  setError('register-error', '');
+  btn.disabled = true;
+  btn.textContent = 'Mendaftar...';
+
+  try {
+    if (!db) {
+      setError('register-error', 'Isi SUPABASE_URL dan SUPABASE_ANON_KEY di supabase-config.js');
+      return;
+    }
+
+    const { data, error } = await db.rpc('register_app_user', {
+      input_email: email,
+      input_password: password,
+      input_name: name,
+    });
+
+    if (error) {
+      // Handle duplicate email
+      if (error.message && error.message.includes('sudah terdaftar')) {
+        setError('register-error', 'Email sudah terdaftar. Silakan masuk.');
+      } else if (error.message && error.message.includes('duplicate')) {
+        setError('register-error', 'Email sudah terdaftar. Silakan masuk.');
+      } else {
+        throw error;
+      }
+      return;
+    }
+
+    const account = Array.isArray(data) ? data[0] : data;
+
+    if (!account) {
+      setError('register-error', 'Pendaftaran gagal. Silakan coba lagi.');
+      return;
+    }
+
+    // Auto-login after successful registration
+    const user = buildUser(account);
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    window.location.href = getAppUrl(user);
+  } catch (error) {
+    setError('register-error', 'Pendaftaran gagal: ' + error.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Daftar';
+  }
+}
+
+/* ===== PASSWORD TOGGLE ===== */
+function setupPasswordToggle(inputId, toggleId) {
+  const input = document.getElementById(inputId);
+  const toggle = document.getElementById(toggleId);
+  if (!input || !toggle) return;
+
+  toggle.addEventListener('click', () => {
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    toggle.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Tampilkan password');
+  });
+}
+
+/* ===== INIT ===== */
 document.addEventListener('DOMContentLoaded', () => {
   const savedUser = getUserFromStorage();
   if (savedUser) {
@@ -101,19 +239,28 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  const passwordInput = document.getElementById('password-input');
-  const passwordToggle = document.getElementById('password-toggle');
+  // Tab switching
+  document.getElementById('tab-login').addEventListener('click', () => switchTab('login'));
+  document.getElementById('tab-register').addEventListener('click', () => switchTab('register'));
+  document.getElementById('go-to-register')?.addEventListener('click', () => switchTab('register'));
+  document.getElementById('go-to-login')?.addEventListener('click', () => switchTab('login'));
 
+  // Login form
   document.getElementById('login-form').addEventListener('submit', loginEmail);
-  document.getElementById('email-input').addEventListener('input', () => setError(''));
-  passwordInput.addEventListener('input', () => setError(''));
-  passwordToggle.addEventListener('click', () => {
-    const isPassword = passwordInput.type === 'password';
-    passwordInput.type = isPassword ? 'text' : 'password';
-    passwordToggle.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Tampilkan password');
-  });
+  document.getElementById('email-input').addEventListener('input', () => setError('login-error', ''));
+  document.getElementById('password-input').addEventListener('input', () => setError('login-error', ''));
 
-  document.getElementById('google-login').addEventListener('click', () => {
-    setError('Login Google belum tersedia');
-  });
+  // Register form
+  document.getElementById('register-form').addEventListener('submit', registerUser);
+  document.getElementById('reg-name-input').addEventListener('input', () => setError('register-error', ''));
+  document.getElementById('reg-email-input').addEventListener('input', () => setError('register-error', ''));
+  document.getElementById('reg-password-input').addEventListener('input', () => setError('register-error', ''));
+  document.getElementById('reg-confirm-input').addEventListener('input', () => setError('register-error', ''));
+
+  // Password toggles
+  setupPasswordToggle('password-input', 'password-toggle');
+  setupPasswordToggle('reg-password-input', 'reg-password-toggle');
+  setupPasswordToggle('reg-confirm-input', 'reg-confirm-toggle');
+
+
 });

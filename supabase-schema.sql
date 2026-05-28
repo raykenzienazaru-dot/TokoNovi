@@ -132,6 +132,61 @@ $$;
 
 grant execute on function public.login_app_user(text, text) to anon, authenticated;
 
+-- ============================================================
+-- Register function: users can self-register (non-admin only)
+-- ============================================================
+create or replace function public.register_app_user(
+  input_email text,
+  input_password text,
+  input_name text
+)
+returns table (
+  id uuid,
+  email text,
+  display_name text,
+  is_admin boolean
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  new_id uuid;
+begin
+  -- Check password length
+  if length(input_password) < 6 then
+    raise exception 'Password minimal 6 karakter';
+  end if;
+
+  -- Check if email already exists
+  if exists (
+    select 1 from public.app_users
+    where lower(app_users.email) = lower(trim(input_email))
+  ) then
+    raise exception 'Email sudah terdaftar';
+  end if;
+
+  -- Insert new user (always non-admin)
+  insert into public.app_users (email, display_name, password_hash, is_admin, is_active)
+  values (
+    lower(trim(input_email)),
+    trim(input_name),
+    extensions.crypt(input_password, extensions.gen_salt('bf')),
+    false,
+    true
+  )
+  returning app_users.id into new_id;
+
+  -- Return user data
+  return query
+    select app_users.id, app_users.email, app_users.display_name, app_users.is_admin
+    from public.app_users
+    where app_users.id = new_id;
+end;
+$$;
+
+grant execute on function public.register_app_user(text, text, text) to anon, authenticated;
+
 alter table public.app_users enable row level security;
 alter table public.products enable row level security;
 alter table public.discounts enable row level security;
