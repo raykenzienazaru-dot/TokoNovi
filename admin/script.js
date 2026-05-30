@@ -481,7 +481,10 @@ window.updateOrderStatus = async function updateOrderStatus(id, status) {
   // Catatan: Pengurangan stok tidak perlu dilakukan manual di sini karena 
   // sudah ditangani secara otomatis oleh trigger 'trg_reduce_stock_on_order_completion' di database.
   const { error } = await db.from("orders").update({ status }).eq("id", id);
-  if (error) return showToast("Gagal mengubah status pesanan");
+  if (error) {
+    console.error("Supabase Error:", error);
+    return showToast("Gagal: " + (error.message || "Kesalahan pada database"));
+  }
   showToast("Status pesanan menjadi " + statusLabel(status));
   
   await Promise.all([loadOrders(), loadProducts()]);
