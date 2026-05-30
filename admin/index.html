@@ -26,26 +26,17 @@
       <button class="nav-item" type="button" data-page-link="barang">
         <i data-lucide="package"></i><span>Barang</span>
       </button>
-      <button class="nav-item" type="button" data-page-link="diskon">
-        <i data-lucide="badge-percent"></i><span>Diskon</span>
-      </button>
       <button class="nav-item" type="button" data-page-link="pesanan">
         <i data-lucide="shopping-cart"></i><span>Pesanan</span>
       </button>
       <button class="nav-item" type="button" data-page-link="pembayaran">
         <i data-lucide="credit-card"></i><span>Pembayaran</span>
       </button>
-      <button class="nav-item" type="button" data-page-link="persetujuan">
-        <i data-lucide="clipboard-check"></i><span>Persetujuan Barang</span>
-      </button>
       <button class="nav-item" type="button" data-page-link="pelanggan">
         <i data-lucide="users"></i><span>Pelanggan</span>
       </button>
       <button class="nav-item" type="button" data-page-link="laporan">
         <i data-lucide="bar-chart-3"></i><span>Laporan</span>
-      </button>
-      <button class="nav-item" type="button" data-page-link="pengaturan">
-        <i data-lucide="settings"></i><span>Pengaturan</span>
       </button>
     </nav>
 
@@ -221,29 +212,6 @@
       </section>
     </section>
 
-    <section class="page" id="page-diskon">
-      <div class="page-head">
-        <h1>Kelola Diskon</h1>
-        <button class="btn primary" id="addDiscountButton" type="button"><i data-lucide="plus"></i>Tambah Diskon</button>
-      </div>
-      <section class="panel table-panel">
-        <table>
-          <thead>
-            <tr>
-              <th>Kode Diskon</th><th>Nama Diskon</th><th>Jenis</th><th>Nilai</th><th>Minimum Belanja</th><th>Periode</th><th>Status</th><th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="discountRows">
-            <tr><td>DISKON10</td><td>Diskon 10%</td><td>Persentase</td><td>10%</td><td>Rp 100.000</td><td>01 Mei 2024 - 31 Mei 2024</td><td><span class="status success">Aktif</span></td><td class="actions"><button><i data-lucide="pencil"></i></button><button><i data-lucide="trash-2"></i></button></td></tr>
-            <tr><td>POTONG20K</td><td>Potongan 20K</td><td>Nominal</td><td>Rp 20.000</td><td>Rp 150.000</td><td>01 Mei 2024 - 15 Mei 2024</td><td><span class="status success">Aktif</span></td><td class="actions"><button><i data-lucide="pencil"></i></button><button><i data-lucide="trash-2"></i></button></td></tr>
-            <tr><td>HEMAT50K</td><td>Hemat 50K</td><td>Nominal</td><td>Rp 50.000</td><td>Rp 300.000</td><td>10 Mei 2024 - 31 Mei 2024</td><td><span class="status success">Aktif</span></td><td class="actions"><button><i data-lucide="pencil"></i></button><button><i data-lucide="trash-2"></i></button></td></tr>
-            <tr><td>DISKON15</td><td>Diskon 15%</td><td>Persentase</td><td>15%</td><td>Rp 200.000</td><td>01 Apr 2024 - 30 Apr 2024</td><td><span class="status danger">Tidak Aktif</span></td><td class="actions"><button><i data-lucide="pencil"></i></button><button><i data-lucide="trash-2"></i></button></td></tr>
-          </tbody>
-        </table>
-        <div class="pagination"><button>&lt;</button><button class="active">1</button><button>2</button><button>&gt;</button></div>
-      </section>
-    </section>
-
     <section class="page" id="page-pesanan">
       <div class="page-head"><h1>Pesanan</h1></div>
       <section class="panel table-panel">
@@ -282,27 +250,6 @@
       </section>
     </section>
 
-    <section class="page" id="page-persetujuan">
-      <div class="page-head compact"><h1>Persetujuan Barang</h1></div>
-      <div class="tabs">
-        <button class="active">Menunggu Persetujuan (5)</button>
-        <button>Disetujui</button>
-        <button>Ditolak</button>
-      </div>
-      <section class="panel table-panel">
-        <table>
-          <thead><tr><th>No</th><th>Nama Barang</th><th>Penjual</th><th>Tanggal Pengajuan</th><th>Status</th><th>Aksi</th></tr></thead>
-          <tbody id="approvalRows">
-            <tr><td>1</td><td><span class="product-cell"><span class="thumb dark"></span>Sepatu Sneakers Putih</span></td><td>Andi Store</td><td>20 Mei 2024 10:30</td><td><span class="status warning">Menunggu</span></td><td class="approve-actions"><button class="approve">Setujui</button><button class="reject">Tolak</button></td></tr>
-            <tr><td>2</td><td><span class="product-cell"><span class="thumb gray"></span>Tas Ransel Pria</span></td><td>Budi Collection</td><td>20 Mei 2024 09:15</td><td><span class="status warning">Menunggu</span></td><td class="approve-actions"><button class="approve">Setujui</button><button class="reject">Tolak</button></td></tr>
-            <tr><td>3</td><td><span class="product-cell"><span class="thumb light"></span>Jam Tangan Analog</span></td><td>Citra Watch</td><td>19 Mei 2024 16:45</td><td><span class="status warning">Menunggu</span></td><td class="approve-actions"><button class="approve">Setujui</button><button class="reject">Tolak</button></td></tr>
-            <tr><td>4</td><td><span class="product-cell"><span class="thumb dark"></span>Kemeja Flanel Pria</span></td><td>Doni Fashion</td><td>19 Mei 2024 14:20</td><td><span class="status warning">Menunggu</span></td><td class="approve-actions"><button class="approve">Setujui</button><button class="reject">Tolak</button></td></tr>
-            <tr><td>5</td><td><span class="product-cell"><span class="thumb gray"></span>Headset Gaming</span></td><td>Eko Elektronik</td><td>18 Mei 2024 11:05</td><td><span class="status warning">Menunggu</span></td><td class="approve-actions"><button class="approve">Setujui</button><button class="reject">Tolak</button></td></tr>
-          </tbody>
-        </table>
-      </section>
-    </section>
-
     <section class="page" id="page-pelanggan">
       <div class="page-head"><h1>Pelanggan</h1></div>
       <section class="panel table-panel">
@@ -335,20 +282,6 @@
       </section>
     </section>
 
-    <section class="page" id="page-pengaturan">
-      <div class="page-head"><h1>Pengaturan</h1></div>
-      <section class="panel form-panel settings-panel">
-        <div class="panel-head lined"><h2>Profil Admin</h2></div>
-        <div class="form-grid">
-          <label class="field"><span>Nama</span><input value="Admin"/></label>
-          <label class="field"><span>Email</span><input value="admin@ecomers.local"/></label>
-          <label class="field full"><span>Nama Toko</span><input value="Ecomers"/></label>
-        </div>
-        <div class="form-actions inside">
-          <button class="btn primary" type="button">Simpan Perubahan</button>
-        </div>
-      </section>
-    </section>
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

@@ -21,10 +21,8 @@ const db = window.supabase && hasSupabaseConfig
 
 const state = {
   products: [],
-  discounts: [],
   orders: [],
   paymentFilter: "all",
-  approvalFilter: "pending", // Default filter untuk persetujuan barang
 };
 
 function refreshIcons() {
@@ -164,14 +162,12 @@ function showPage(pageName, updateHash = true) {
 
 async function loadAll() {
   if (!requireDb()) return;
-  await Promise.all([loadProducts(), loadDiscounts(), loadOrders()]);
+  await Promise.all([loadProducts(), loadOrders()]);
   renderDashboard();
   updateRealTimeDate();
   renderProducts();
-  renderDiscounts();
   renderOrders();
   renderPayments();
-  renderApprovals();
   renderCustomers();
   renderReports();
   requestAnimationFrame(drawSalesChart);
@@ -188,19 +184,6 @@ async function loadProducts() {
     return;
   }
   state.products = data || [];
-}
-
-async function loadDiscounts() {
-  const { data, error } = await db
-    .from("discounts")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    showToast("Gagal memuat diskon: " + error.message);
-    return;
-  }
-  state.discounts = data || [];
 }
 
 async function loadOrders() {
@@ -273,33 +256,6 @@ function renderProducts() {
   refreshIcons();
 }
 
-function renderDiscounts() {
-  const rows = document.getElementById("discountRows");
-  if (!rows) return;
-
-  if (!state.discounts.length) {
-    rows.innerHTML = `<tr><td colspan="8">Belum ada diskon.</td></tr>`;
-    return;
-  }
-
-  rows.innerHTML = state.discounts.map((discount) => `
-    <tr>
-      <td>${escapeHtml(discount.code)}</td>
-      <td>${escapeHtml(discount.name)}</td>
-      <td>${discount.discount_type === "fixed" ? "Nominal" : "Persentase"}</td>
-      <td>${discount.discount_type === "fixed" ? formatRp(discount.value) : `${Number(discount.value || 0)}%`}</td>
-      <td>${formatRp(discount.minimum_order)}</td>
-      <td>${escapeHtml(discount.starts_at || "-")} - ${escapeHtml(discount.ends_at || "-")}</td>
-      <td><span class="status ${discount.is_active ? "success" : "danger"}">${discount.is_active ? "Aktif" : "Tidak Aktif"}</span></td>
-      <td class="actions">
-        <button type="button" onclick="toggleDiscount('${escapeJs(discount.id)}', ${discount.is_active ? "false" : "true"})" aria-label="Ubah status"><i data-lucide="${discount.is_active ? "eye-off" : "eye"}"></i></button>
-        <button type="button" onclick="deleteDiscount('${escapeJs(discount.id)}')" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
-      </td>
-    </tr>
-  `).join("");
-  refreshIcons();
-}
-
 function renderOrders() {
   const rows = document.getElementById("orderRows");
   if (!rows) return;
@@ -354,56 +310,6 @@ function renderPayments() {
       <td class="actions">${order.payment_proof_url ? `<button type="button" onclick="openProof('${escapeJs(order.payment_proof_url)}')" aria-label="Bukti"><i data-lucide="eye"></i></button>` : "-"}</td>
     </tr>
   `).join("");
-  refreshIcons();
-}
-
-function renderApprovals() {
-  const rows = document.getElementById("approvalRows");
-  if (!rows) return;
-
-  if (!state.products.length) {
-    rows.innerHTML = `<tr><td colspan="6">Belum ada produk.</td></tr>`;
-    return;
-  }
-
-  // Filter products based on state.approvalFilter
-  const filteredProducts = state.products.filter(product => {
-    const currentStatus = (product.approval_status || "pending").toLowerCase();
-    if (state.approvalFilter === "all") return true;
-    return currentStatus === state.approvalFilter;
-  });
-
-  if (!filteredProducts.length) {
-    rows.innerHTML = `<tr><td colspan="6">Tidak ada produk dengan status ${statusLabel(state.approvalFilter)}.</td></tr>`;
-    refreshIcons(); // Ensure icons are refreshed for empty state
-    return;
-  }
-
-  rows.innerHTML = filteredProducts.map((product, index) => {
-    const status = product.approval_status || "pending"; // Default to 'pending'
-    let actionsHtml = '';
-
-    if (status === 'pending') {
-      actionsHtml = `
-        <button class="approve" type="button" onclick="updateProductApproval('${escapeJs(product.id)}','approved')">Setujui</button>
-        <button class="reject" type="button" onclick="updateProductApproval('${escapeJs(product.id)}','rejected')">Tolak</button>
-      `;
-    } else if (status === 'rejected') {
-      actionsHtml = `<button class="approve" type="button" onclick="updateProductApproval('${escapeJs(product.id)}','approved')">Setujui Kembali</button>`;
-    } else if (status === 'approved') {
-      actionsHtml = `<button class="reject" type="button" onclick="updateProductApproval('${escapeJs(product.id)}','rejected')">Tolak</button>`;
-    }
-
-    return `
-      <tr>
-        <td>${index + 1}</td>
-        <td><span class="product-cell">${product.image_url ? `<img class="admin-thumb-img" src="${escapeHtml(product.image_url)}" alt="${escapeHtml(product.name)}"/>` : '<span class="thumb gray"></span>'}${escapeHtml(product.name)}</span></td>
-        <td>${escapeHtml(product.seller_name || "Admin")}</td>
-        <td>${formatDate(product.created_at)}</td>
-        <td><span class="status ${statusClass(status)}">${statusLabel(status)}</span></td>
-        <td class="approve-actions">${actionsHtml}</td>
-      </tr>`;
-  }).join("");
   refreshIcons();
 }
 
@@ -522,7 +428,6 @@ async function saveProduct(event) {
     button.textContent = "Simpan";
     await loadProducts();
     renderProducts();
-    renderApprovals();
     renderDashboard();
   } catch (error) {
     showToast("Gagal menyimpan produk: " + error.message);
@@ -550,7 +455,6 @@ window.toggleProduct = async function toggleProduct(id, isActive) {
   if (error) return showToast("Gagal mengubah status produk");
   await loadProducts();
   renderProducts();
-  renderApprovals();
   renderDashboard();
 };
 
@@ -562,21 +466,7 @@ window.deleteProduct = async function deleteProduct(id) {
   showToast("Barang berhasil dihapus");
   await loadProducts();
   renderProducts();
-  renderApprovals();
   renderDashboard();
-};
-
-window.updateProductApproval = async function updateProductApproval(id, approvalStatus) {
-  if (!requireDb()) return;
-  const { error } = await db
-    .from("products")
-    .update({ approval_status: approvalStatus, is_active: approvalStatus === "approved" })
-    .eq("id", id);
-  if (error) return showToast("Gagal mengubah persetujuan");
-  showToast(approvalStatus === "approved" ? "Produk disetujui" : "Produk ditolak");
-  await loadProducts();
-  renderProducts();
-  renderApprovals();
 };
 
 window.updateOrderStatus = async function updateOrderStatus(id, status) {
@@ -615,48 +505,6 @@ window.openProof = function openProof(url) {
   window.open(url, "_blank", "noopener,noreferrer");
 };
 
-window.toggleDiscount = async function toggleDiscount(id, isActive) {
-  if (!requireDb()) return;
-  const { error } = await db.from("discounts").update({ is_active: isActive }).eq("id", id);
-  if (error) return showToast("Gagal mengubah diskon");
-  await loadDiscounts();
-  renderDiscounts();
-};
-
-window.deleteDiscount = async function deleteDiscount(id) {
-  if (!confirm("Hapus diskon ini?")) return;
-  if (!requireDb()) return;
-  const { error } = await db.from("discounts").delete().eq("id", id);
-  if (error) return showToast("Gagal menghapus diskon");
-  await loadDiscounts();
-  renderDiscounts();
-};
-
-async function addDiscount() {
-  if (!requireDb()) return;
-  const code = prompt("Kode diskon:");
-  if (!code) return;
-  const name = prompt("Nama diskon:", code);
-  if (!name) return;
-  const value = Number(prompt("Nilai diskon. Contoh 10 untuk 10%:", "10") || 0);
-  const minimum = Number(prompt("Minimum belanja:", "0") || 0);
-
-  const { error } = await db.from("discounts").insert({
-    code: code.trim().toUpperCase(),
-    name: name.trim(),
-    discount_type: "percent",
-    value,
-    minimum_order: minimum,
-    starts_at: new Date().toISOString().slice(0, 10),
-    ends_at: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
-    is_active: true,
-  });
-
-  if (error) return showToast("Gagal menambah diskon: " + error.message);
-  await loadDiscounts();
-  renderDiscounts();
-}
-
 document.querySelectorAll("[data-tabs] button").forEach((tab) => {
   tab.addEventListener("click", () => {
     state.paymentFilter = tab.dataset.filter;
@@ -664,22 +512,6 @@ document.querySelectorAll("[data-tabs] button").forEach((tab) => {
       item.classList.toggle("active", item === tab);
     });
     renderPayments();
-  });
-});
-
-// Approval tabs handling for Persetujuan Barang page
-document.querySelectorAll('#page-persetujuan .tabs button').forEach(tab => {
-  tab.addEventListener('click', () => {
-    const txt = tab.textContent.toLowerCase();
-    // Map tab text to actual approval status values
-    if (txt.includes('menunggu')) state.approvalFilter = 'pending';
-    else if (txt.includes('disetujui')) state.approvalFilter = 'approved';
-    else if (txt.includes('ditolak')) state.approvalFilter = 'rejected';
-    else state.approvalFilter = 'all'; // Untuk tab "Semua"
-    document.querySelectorAll('#page-persetujuan .tabs button').forEach(item => {
-      item.classList.toggle('active', item === tab);
-    });
-    renderApprovals();
   });
 });
 
@@ -706,7 +538,7 @@ productForm?.addEventListener("submit", saveProduct);
 productForm?.addEventListener("reset", () => {
   document.getElementById("productId").value = "";
 });
-document.getElementById("addDiscountButton")?.addEventListener("click", addDiscount);
+
 
 if (dropZone && productImage) {
   ["dragenter", "dragover"].forEach((eventName) => {
@@ -759,15 +591,18 @@ function drawSalesChart() {
 
   const values = daily.some(Boolean) ? daily : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   const max = Math.max(10, Math.ceil(Math.max(...values) / 10) * 10);
-  const pad = { top: 18, right: 22, bottom: 34, left: 54 };
+  const pad = { top: 20, right: 20, bottom: 40, left: 60 };
   const chartW = width - pad.left - pad.right;
   const chartH = height - pad.top - pad.bottom;
 
-  ctx.strokeStyle = "#e5eaf2";
+  // Garis Horizontal Grid
+  ctx.strokeStyle = "rgba(229, 234, 242, 0.7)";
   ctx.lineWidth = 1;
-  ctx.setLineDash([4, 4]);
-  ctx.font = "12px Inter, Arial, sans-serif";
+  ctx.setLineDash([5, 5]);
+  ctx.font = "500 11px Inter, sans-serif";
   ctx.fillStyle = "#8a95a6";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
 
   [0, max / 4, max / 2, (max * 3) / 4, max].forEach((tick) => {
     const y = pad.top + chartH - (tick / max) * chartH;
@@ -776,19 +611,18 @@ function drawSalesChart() {
     ctx.lineTo(width - pad.right, y);
     ctx.stroke();
     
-    // Label dinamis: Ribuan (rb) atau Jutaan (jt)
     let tickLabel = "Rp 0";
     if (tick > 0) {
-      if (tick >= 1000000) tickLabel = `Rp ${(tick / 1000000).toFixed(1)} jt`;
-      else if (tick >= 1000) tickLabel = `Rp ${Math.round(tick / 1000)} rb`;
+      if (tick >= 1000000) tickLabel = `Rp ${(tick / 1000000).toFixed(1)}jt`;
+      else if (tick >= 1000) tickLabel = `Rp ${Math.round(tick / 1000)}rb`;
       else tickLabel = `Rp ${tick}`;
     }
-    ctx.fillText(tickLabel, 10, y + 4);
+    ctx.fillText(tickLabel, pad.left - 10, y);
   });
 
-  // Gambar Label Tanggal di Sumbu X (Setiap 7 hari agar tidak menumpuk)
   ctx.setLineDash([]);
   ctx.textAlign = "center";
+  ctx.textBaseline = "top";
   const labelIndices = [0, 7, 14, 21, 29];
   labelIndices.forEach((idx) => {
     const x = pad.left + (idx / (values.length - 1)) * chartW;
@@ -797,27 +631,70 @@ function drawSalesChart() {
     
     const dateStr = labelDate.toLocaleDateString("id-ID", { day: '2-digit', month: 'short' });
     ctx.fillStyle = "#8a95a6";
-    ctx.fillText(dateStr, x, height - 10);
+    ctx.fillText(dateStr, x, height - pad.bottom + 12);
   });
 
-  ctx.setLineDash([]);
+  const points = values.map((value, index) => ({
+    x: pad.left + (index / (values.length - 1)) * chartW,
+    y: pad.top + chartH - (value / max) * chartH
+  }));
+
+  // Gradient Bawah Garis (Area Chart)
+  const gradient = ctx.createLinearGradient(0, pad.top, 0, height - pad.bottom);
+  gradient.addColorStop(0, "rgba(37, 99, 255, 0.3)");
+  gradient.addColorStop(1, "rgba(37, 99, 255, 0.0)");
+
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, pad.top + chartH);
+  points.forEach((point, i) => {
+    if (i === 0) ctx.lineTo(point.x, point.y);
+    else {
+      const prev = points[i - 1];
+      const cpX = (prev.x + point.x) / 2;
+      ctx.bezierCurveTo(cpX, prev.y, cpX, point.y, point.x, point.y);
+    }
+  });
+  ctx.lineTo(points[points.length - 1].x, pad.top + chartH);
+  ctx.closePath();
+  ctx.fillStyle = gradient;
+  ctx.fill();
+
+  // Garis Grafik (Curved)
+  ctx.beginPath();
+  points.forEach((point, i) => {
+    if (i === 0) ctx.moveTo(point.x, point.y);
+    else {
+      const prev = points[i - 1];
+      const cpX = (prev.x + point.x) / 2;
+      ctx.bezierCurveTo(cpX, prev.y, cpX, point.y, point.x, point.y);
+    }
+  });
+
+  // Shadow Garis
+  ctx.shadowColor = "rgba(37, 99, 255, 0.4)";
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetY = 4;
+  
   ctx.strokeStyle = "#2563ff";
   ctx.lineWidth = 3;
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
+  ctx.stroke();
 
-  values.forEach((value, index) => {
-    const x = pad.left + (index / (values.length - 1)) * chartW;
-    const y = pad.top + chartH - (value / max) * chartH;
-    if (index === 0) {
+  ctx.shadowColor = "transparent";
+
+  // Titik Data Bulat
+  points.forEach((point, i) => {
+    if (labelIndices.includes(i) || point.y < pad.top + chartH) {
       ctx.beginPath();
-      ctx.moveTo(x, y);
-    } else {
-      ctx.lineTo(x, y);
+      ctx.arc(point.x, point.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#2563ff";
+      ctx.stroke();
     }
   });
-
-  ctx.stroke();
 }
 
 window.addEventListener("resize", drawSalesChart);

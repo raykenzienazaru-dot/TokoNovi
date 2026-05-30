@@ -73,7 +73,7 @@
             <p class="auth-error" id="login-error" role="alert"></p>
           </div>
 
-          <a class="forgot-link" href="#">Lupa password?</a>
+          <a class="forgot-link" href="#" id="go-to-forgot">Lupa password?</a>
           <button type="submit" class="auth-submit" id="login-btn">Masuk</button>
         </form>
 
@@ -155,6 +155,78 @@
         <p class="auth-switch-copy">Sudah punya akun? <button type="button" class="auth-switch-btn" id="go-to-login">Masuk sekarang</button></p>
       </div>
 
+      <!-- ===== FORGOT PASSWORD PANEL ===== -->
+      <div class="auth-panel" id="panel-forgot" role="tabpanel">
+        <div class="auth-heading">
+          <h2>Reset Password</h2>
+          <p>Masukkan email dan nama untuk reset password</p>
+        </div>
+
+        <form class="auth-form" id="forgot-form" novalidate>
+          <div class="auth-field">
+            <label class="auth-label" for="forgot-email-input">Email</label>
+            <div class="auth-input-wrap">
+              <svg class="auth-field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 6h16v12H4z" />
+                <path d="m4 7 8 6 8-6" />
+              </svg>
+              <input type="email" class="auth-input" id="forgot-email-input" placeholder="Masukkan email Anda" autocomplete="email"/>
+            </div>
+          </div>
+
+          <div class="auth-field">
+            <label class="auth-label" for="forgot-name-input">Nama Lengkap</label>
+            <div class="auth-input-wrap">
+              <svg class="auth-field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
+              <input type="text" class="auth-input" id="forgot-name-input" placeholder="Masukkan nama lengkap Anda" autocomplete="name"/>
+            </div>
+          </div>
+
+          <div class="auth-field">
+            <label class="auth-label" for="forgot-password-input">Password Baru</label>
+            <div class="auth-input-wrap">
+              <svg class="auth-field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="10" width="14" height="10" rx="2" />
+                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                <path d="M12 14v3" />
+              </svg>
+              <input type="password" class="auth-input" id="forgot-password-input" placeholder="Buat password baru" autocomplete="new-password"/>
+              <button class="password-toggle" type="button" id="forgot-password-toggle" aria-label="Tampilkan password">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="auth-field">
+            <label class="auth-label" for="forgot-confirm-input">Konfirmasi Password</label>
+            <div class="auth-input-wrap">
+              <svg class="auth-field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="10" width="14" height="10" rx="2" />
+                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                <path d="M12 14v3" />
+              </svg>
+              <input type="password" class="auth-input" id="forgot-confirm-input" placeholder="Ulangi password baru" autocomplete="new-password"/>
+              <button class="password-toggle" type="button" id="forgot-confirm-toggle" aria-label="Tampilkan password">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </div>
+            <p class="auth-error" id="forgot-error" role="alert"></p>
+          </div>
+
+          <button type="submit" class="auth-submit" id="forgot-btn" style="margin-top:8px">Reset Password</button>
+        </form>
+
+        <p class="auth-switch-copy"><button type="button" class="auth-switch-btn" id="go-back-login">Kembali ke halaman Masuk</button></p>
+      </div>
     </section>
   </main>
 

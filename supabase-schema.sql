@@ -324,32 +324,30 @@ on storage.objects for insert
 with check (bucket_id = 'payment-proofs');
 
 -- ============================================================
--- Trigger: Kurangi Stok Otomatis Saat Pesanan Selesai
+-- Trigger: Kurangi Stok Otomatis Saat Pesanan Dibuat
 -- ============================================================
-create or replace function public.reduce_stock_on_order_completion()
+create or replace function public.reduce_stock_on_order_insert()
 returns trigger
 language plpgsql
 security definer
 set search_path = public
 as $$
 begin
-  -- Hanya jalankan jika status berubah dari non-completed menjadi 'completed'
-  if old.status <> 'completed' and new.status = 'completed' then
-    -- Loop melalui setiap item dalam pesanan yang baru saja selesai
-    update public.products p
-    set stock = p.stock - oi.quantity
-    from public.order_items oi
-    where oi.order_id = new.id
-      and p.id = oi.product_id
-      and p.stock >= oi.quantity; -- Pastikan stok tidak menjadi negatif
-
-    -- Opsional: Tambahkan penanganan error atau log jika stok tidak mencukupi
-  end if;
+  -- Langsung kurangi stok saat item pesanan ditambahkan ke database
+  update public.products
+  set stock = stock - new.quantity
+  where id = new.product_id
+    and stock >= new.quantity;
+  
   return new;
 end;
 $$;
 
+-- Hapus trigger lama jika ada
 drop trigger if exists trg_reduce_stock_on_order_completion on public.orders;
-create trigger trg_reduce_stock_on_order_completion
-before update on public.orders
-for each row execute function public.reduce_stock_on_order_completion();
+drop trigger if exists trg_reduce_stock_on_order_insert on public.order_items;
+
+-- Buat trigger baru di tabel order_items
+create trigger trg_reduce_stock_on_order_insert
+after insert on public.order_items
+for each row execute function public.reduce_stock_on_order_insert();

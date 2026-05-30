@@ -309,6 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('tab-register').addEventListener('click', () => switchTab('register'));
   document.getElementById('go-to-register')?.addEventListener('click', () => switchTab('register'));
   document.getElementById('go-to-login')?.addEventListener('click', () => switchTab('login'));
+  document.getElementById('go-back-login')?.addEventListener('click', () => switchTab('login'));
   document.getElementById('go-to-forgot')?.addEventListener('click', () => switchTab('forgot'));
 
   // Login form
