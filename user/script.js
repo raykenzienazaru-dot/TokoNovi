@@ -99,6 +99,7 @@ function statusLabel(status) {
   return {
     pending: "Menunggu Konfirmasi",
     paid: "Dibayar",
+    processing: "Sedang Diproses",
     rejected: "Dibatalkan",
     completed: "Selesai",
     cancelled: "Dibatalkan",
@@ -109,6 +110,7 @@ function getBadgeClass(status) {
   return {
     pending: "badge-pending",
     paid: "badge-paid",
+    processing: "badge-paid",
     rejected: "badge-rejected",
     completed: "badge-completed",
     cancelled: "badge-rejected",

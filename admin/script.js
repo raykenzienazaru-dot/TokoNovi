@@ -319,8 +319,9 @@ function renderOrders() {
       <td>${formatDate(order.created_at)}</td>
       <td class="actions">
         ${order.payment_proof_url ? `<button type="button" onclick="openProof('${escapeJs(order.payment_proof_url)}')" aria-label="Bukti"><i data-lucide="image"></i></button>` : ""}
-        ${order.status === "pending" ? `<button type="button" class="btn-process" onclick="updateOrderStatus('${escapeJs(order.id)}','processing')" title="Proses Pesanan"><i data-lucide="package"></i></button><button type="button" class="btn-reject" onclick="rejectOrder('${escapeJs(order.id)}')" title="Tolak Pesanan"><i data-lucide="x-circle"></i></button>` : ""}
-        ${["paid", "processing"].includes(order.status) ? `<button type="button" class="btn-complete" onclick="updateOrderStatus('${escapeJs(order.id)}','completed')" title="Selesaikan Pesanan"><i data-lucide="check-circle"></i></button>` : ""}
+        ${order.status === "pending" ? `<button type="button" class="btn-process" onclick="updateOrderStatus('${escapeJs(order.id)}','paid')" title="Konfirmasi Pembayaran"><i data-lucide="check-circle"></i></button><button type="button" class="btn-reject" onclick="rejectOrder('${escapeJs(order.id)}')" title="Tolak Pesanan"><i data-lucide="x-circle"></i></button>` : ""}
+        ${order.status === "paid" ? `<button type="button" class="btn-process" onclick="updateOrderStatus('${escapeJs(order.id)}','processing')" title="Proses Pesanan"><i data-lucide="package"></i></button>` : ""}
+        ${order.status === "processing" ? `<button type="button" class="btn-complete" onclick="updateOrderStatus('${escapeJs(order.id)}','completed')" title="Selesaikan Pesanan"><i data-lucide="check-circle"></i></button>` : ""}
       </td>
     </tr>
   `).join("");
