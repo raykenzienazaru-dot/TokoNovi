@@ -280,10 +280,10 @@ function renderOrders() {
       <td><span class="status ${statusClass(order.status)}">${statusLabel(order.status)}</span></td>
       <td>${formatDate(order.created_at)}</td>
       <td class="actions">
-        ${order.payment_proof_url ? `<button type="button" onclick="openProof('${escapeJs(order.payment_proof_url)}')" aria-label="Bukti"><i data-lucide="image"></i></button>` : ""}
-        ${order.status === "pending" ? `<button type="button" class="btn-process" onclick="updateOrderStatus('${escapeJs(order.id)}','paid')" title="Konfirmasi Pembayaran"><i data-lucide="check-circle"></i></button><button type="button" class="btn-reject" onclick="rejectOrder('${escapeJs(order.id)}')" title="Tolak Pesanan"><i data-lucide="x-circle"></i></button>` : ""}
-        ${order.status === "paid" ? `<button type="button" class="btn-process" onclick="updateOrderStatus('${escapeJs(order.id)}','processing')" title="Proses Pesanan"><i data-lucide="package"></i></button>` : ""}
-        ${order.status === "processing" ? `<button type="button" class="btn-complete" onclick="updateOrderStatus('${escapeJs(order.id)}','completed')" title="Selesaikan Pesanan"><i data-lucide="check-circle"></i></button>` : ""}
+        ${order.payment_proof_url ? `<button type="button" class="btn-secondary" onclick="openProof('${escapeJs(order.payment_proof_url)}')" title="Lihat Bukti Transfer"><i data-lucide="image"></i> Bukti</button>` : ""}
+        ${order.status === "pending" ? `<button type="button" class="btn-process" onclick="updateOrderStatus('${escapeJs(order.id)}','paid')" title="Terima Pembayaran"><i data-lucide="check-circle"></i> Terima</button> <button type="button" class="btn-reject" onclick="rejectOrder('${escapeJs(order.id)}')" title="Tolak Pesanan"><i data-lucide="x-circle"></i> Tolak</button>` : ""}
+        ${order.status === "paid" ? `<button type="button" class="btn-process" onclick="updateOrderStatus('${escapeJs(order.id)}','processing')" title="Mulai Proses Barang"><i data-lucide="package"></i> Proses</button>` : ""}
+        ${order.status === "processing" ? `<button type="button" class="btn-complete" onclick="updateOrderStatus('${escapeJs(order.id)}','completed')" title="Selesaikan Pesanan"><i data-lucide="check-circle"></i> Selesai</button>` : ""}
       </td>
     </tr>
   `).join("");
