@@ -49,7 +49,7 @@ create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
   order_number text not null unique,
   status text not null default 'pending'
-    check (status in ('pending', 'paid', 'completed', 'rejected', 'cancelled')),
+    check (status in ('pending', 'processing', 'completed', 'rejected', 'cancelled', 'paid')),
   total_amount numeric(12, 2) not null default 0 check (total_amount >= 0),
   customer_name text not null,
   customer_email text not null,
@@ -186,6 +186,36 @@ end;
 $$;
 
 grant execute on function public.register_app_user(text, text, text) to anon, authenticated;
+
+-- ============================================================
+-- Reset Password Function (Step 2 TODO)
+-- ============================================================
+create or replace function public.reset_app_user_password(
+  input_email text,
+  input_name text,
+  input_new_password text
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.app_users
+  set password_hash = extensions.crypt(input_new_password, extensions.gen_salt('bf')),
+      updated_at = now()
+  where lower(email) = lower(trim(input_email))
+    and lower(display_name) = lower(trim(input_name));
+
+  if found then
+    return true;
+  else
+    raise exception 'Email atau Nama tidak cocok dengan data kami';
+  end if;
+end;
+$$;
+
+grant execute on function public.reset_app_user_password(text, text, text) to anon, authenticated;
 
 alter table public.app_users enable row level security;
 alter table public.products enable row level security;

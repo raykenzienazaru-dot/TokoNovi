@@ -1,5 +1,6 @@
 const APP_CONFIG = window.APP_CONFIG || {};
-const USER_KEY = "tokoku_user_v2";
+// Use the same key as login.js for consistency
+const USER_KEY = "currentUser";
 const pageLinks = document.querySelectorAll("[data-page-link]");
 const pages = document.querySelectorAll(".page");
 const menuButton = document.getElementById("menuButton");
@@ -23,6 +24,7 @@ const state = {
   discounts: [],
   orders: [],
   paymentFilter: "all",
+  approvalFilter: "pending", // Default filter untuk persetujuan barang
 };
 
 function refreshIcons() {
@@ -72,9 +74,11 @@ function formatDate(value) {
 function statusLabel(status) {
   return {
     pending: "Menunggu Konfirmasi",
-    paid: "Dibayar",
+    paid: "Dibayar", 
+    processing: "Sedang Diproses",
     completed: "Selesai",
     rejected: "Ditolak",
+    approved: "Disetujui",
     cancelled: "Dibatalkan",
   }[status] || status || "-";
 }
@@ -83,6 +87,7 @@ function statusClass(status) {
   return {
     pending: "warning",
     paid: "info",
+    processing: "info",
     completed: "success",
     rejected: "danger",
     cancelled: "danger",
@@ -94,6 +99,15 @@ function requireDb() {
   if (db) return true;
   showToast("Isi SUPABASE_URL dan SUPABASE_ANON_KEY di supabase-config.js");
   return false;
+}
+
+function updateRealTimeDate() {
+  const dateElement = document.getElementById("currentDateDisplay"); // Pastikan ID ini ada di HTML
+  if (dateElement) {
+    const now = new Date();
+    dateElement.textContent = now.toLocaleDateString("id-ID", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  setText("reportDate", new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" }));
 }
 
 function showPage(pageName, updateHash = true) {
@@ -116,6 +130,7 @@ function showPage(pageName, updateHash = true) {
   if (pageName === "dashboard") {
     renderDashboard();
     requestAnimationFrame(drawSalesChart);
+    updateRealTimeDate();
   }
 }
 
@@ -123,6 +138,7 @@ async function loadAll() {
   if (!requireDb()) return;
   await Promise.all([loadProducts(), loadDiscounts(), loadOrders()]);
   renderDashboard();
+  updateRealTimeDate();
   renderProducts();
   renderDiscounts();
   renderOrders();
@@ -222,6 +238,7 @@ function renderProducts() {
       <td class="actions">
         <button type="button" onclick="editProduct('${escapeJs(product.id)}')" aria-label="Edit"><i data-lucide="pencil"></i></button>
         <button type="button" onclick="toggleProduct('${escapeJs(product.id)}', ${product.is_active ? "false" : "true"})" aria-label="Ubah status"><i data-lucide="${product.is_active ? "eye-off" : "eye"}"></i></button>
+        <button type="button" onclick="deleteProduct('${escapeJs(product.id)}')" class="danger" aria-label="Hapus"><i data-lucide="trash-2"></i></button>
       </td>
     </tr>
   `).join("");
@@ -274,8 +291,8 @@ function renderOrders() {
       <td>${formatDate(order.created_at)}</td>
       <td class="actions">
         ${order.payment_proof_url ? `<button type="button" onclick="openProof('${escapeJs(order.payment_proof_url)}')" aria-label="Bukti"><i data-lucide="image"></i></button>` : ""}
-        ${order.status === "pending" ? `<button type="button" onclick="updateOrderStatus('${escapeJs(order.id)}','paid')" aria-label="Terima"><i data-lucide="check"></i></button><button type="button" onclick="rejectOrder('${escapeJs(order.id)}')" aria-label="Tolak"><i data-lucide="x"></i></button>` : ""}
-        ${order.status === "paid" ? `<button type="button" onclick="updateOrderStatus('${escapeJs(order.id)}','completed')" aria-label="Selesai"><i data-lucide="badge-check"></i></button>` : ""}
+        ${order.status === "pending" ? `<button type="button" class="btn-process" onclick="updateOrderStatus('${escapeJs(order.id)}','processing')" title="Proses Pesanan"><i data-lucide="package"></i></button><button type="button" class="btn-reject" onclick="rejectOrder('${escapeJs(order.id)}')" title="Tolak Pesanan"><i data-lucide="x-circle"></i></button>` : ""}
+        ${["paid", "processing"].includes(order.status) ? `<button type="button" class="btn-complete" onclick="updateOrderStatus('${escapeJs(order.id)}','completed')" title="Selesaikan Pesanan"><i data-lucide="check-circle"></i></button>` : ""}
       </td>
     </tr>
   `).join("");
@@ -320,21 +337,45 @@ function renderApprovals() {
     return;
   }
 
-  rows.innerHTML = state.products.map((product, index) => {
-    const status = product.approval_status || "approved";
+  // Filter products based on state.approvalFilter
+  const filteredProducts = state.products.filter(product => {
+    const currentStatus = product.approval_status || "pending"; // Default to 'pending' if not set
+    if (state.approvalFilter === "all") return true;
+    return currentStatus === state.approvalFilter;
+  });
+
+  if (!filteredProducts.length) {
+    rows.innerHTML = `<tr><td colspan="6">Tidak ada produk dengan status ${statusLabel(state.approvalFilter)}.</td></tr>`;
+    refreshIcons(); // Ensure icons are refreshed for empty state
+    return;
+  }
+
+  rows.innerHTML = filteredProducts.map((product, index) => {
+    const status = product.approval_status || "pending"; // Default to 'pending'
+    let actionsHtml = '';
+
+    if (status === 'pending') {
+      actionsHtml = `
+        <button class="approve" type="button" onclick="updateProductApproval('${escapeJs(product.id)}','approved')">Setujui</button>
+        <button class="reject" type="button" onclick="updateProductApproval('${escapeJs(product.id)}','rejected')">Tolak</button>
+      `;
+    } else if (status === 'rejected') {
+      actionsHtml = `<button class="approve" type="button" onclick="updateProductApproval('${escapeJs(product.id)}','approved')">Setujui Kembali</button>`;
+    } else if (status === 'approved') {
+      actionsHtml = `<button class="reject" type="button" onclick="updateProductApproval('${escapeJs(product.id)}','rejected')">Tolak</button>`;
+    }
+
     return `
       <tr>
         <td>${index + 1}</td>
         <td><span class="product-cell">${product.image_url ? `<img class="admin-thumb-img" src="${escapeHtml(product.image_url)}" alt="${escapeHtml(product.name)}"/>` : '<span class="thumb gray"></span>'}${escapeHtml(product.name)}</span></td>
         <td>${escapeHtml(product.seller_name || "Admin")}</td>
         <td>${formatDate(product.created_at)}</td>
-        <td><span class="status ${statusClass(status)}">${status === "approved" ? "Disetujui" : status === "rejected" ? "Ditolak" : "Menunggu"}</span></td>
-        <td class="approve-actions">
-          <button class="approve" type="button" onclick="updateProductApproval('${escapeJs(product.id)}','approved')">Setujui</button>
-          <button class="reject" type="button" onclick="updateProductApproval('${escapeJs(product.id)}','rejected')">Tolak</button>
-        </td>
+        <td><span class="status ${statusClass(status)}">${statusLabel(status)}</span></td>
+        <td class="approve-actions">${actionsHtml}</td>
       </tr>`;
   }).join("");
+  refreshIcons();
 }
 
 function renderCustomers() {
@@ -511,10 +552,27 @@ window.updateProductApproval = async function updateProductApproval(id, approval
 
 window.updateOrderStatus = async function updateOrderStatus(id, status) {
   if (!requireDb()) return;
+  
+  // Jika status diubah ke 'completed', kurangi stok barang
+  if (status === 'completed') {
+    const order = state.orders.find(o => String(o.id) === String(id));
+    if (order && order.order_items) {
+      for (const item of order.order_items) {
+        // Ambil stok terbaru langsung dari DB untuk menghindari clash data lama
+        const { data: pData } = await db.from("products").select("stock").eq("id", item.product_id).single();
+        if (pData) {
+          const newStock = Math.max(0, Number(pData.stock || 0) - Number(item.quantity || 0));
+          await db.from("products").update({ stock: newStock }).eq("id", item.product_id);
+        }
+      }
+    }
+  }
+
   const { error } = await db.from("orders").update({ status }).eq("id", id);
   if (error) return showToast("Gagal mengubah status pesanan");
   showToast("Status pesanan menjadi " + statusLabel(status));
-  await loadOrders();
+  
+  await Promise.all([loadOrders(), loadProducts()]);
   renderDashboard();
   renderOrders();
   renderPayments();
@@ -597,10 +655,11 @@ document.querySelectorAll("[data-tabs] button").forEach((tab) => {
 document.querySelectorAll('#page-persetujuan .tabs button').forEach(tab => {
   tab.addEventListener('click', () => {
     const txt = tab.textContent.toLowerCase();
-    let filter = 'pending';
-    if (txt.includes('setujui')) filter = 'approved';
-    else if (txt.includes('tolak')) filter = 'rejected';
-    state.approvalFilter = filter;
+    // Map tab text to actual approval status values
+    if (txt.includes('menunggu')) state.approvalFilter = 'pending';
+    else if (txt.includes('disetujui')) state.approvalFilter = 'approved';
+    else if (txt.includes('ditolak')) state.approvalFilter = 'rejected';
+    else state.approvalFilter = 'all'; // Untuk tab "Semua"
     document.querySelectorAll('#page-persetujuan .tabs button').forEach(item => {
       item.classList.toggle('active', item === tab);
     });
@@ -624,7 +683,7 @@ overlay?.addEventListener("click", () => {
 });
 
 logoutLink?.addEventListener("click", () => {
-  localStorage.removeItem(USER_KEY);
+  sessionStorage.removeItem(USER_KEY);
 });
 
 productForm?.addEventListener("submit", saveProduct);
@@ -679,7 +738,7 @@ function drawSalesChart() {
     if (!["paid", "completed"].includes(order.status)) return;
     const date = new Date(order.created_at);
     const diff = Math.floor((now - date) / 86400000);
-    if (diff >= 0 && diff < 30) daily[29 - diff] += Number(order.total_amount || 0) / 1000000;
+    if (diff >= 0 && diff < 30) daily[29 - diff] += Number(order.total_amount || 0);
   });
 
   const values = daily.some(Boolean) ? daily : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -700,7 +759,15 @@ function drawSalesChart() {
     ctx.moveTo(pad.left, y);
     ctx.lineTo(width - pad.right, y);
     ctx.stroke();
-    ctx.fillText(tick === 0 ? "Rp 0" : `Rp ${Math.round(tick)} jt`, 10, y + 4);
+    
+    // Label dinamis: Ribuan (rb) atau Jutaan (jt)
+    let tickLabel = "Rp 0";
+    if (tick > 0) {
+      if (tick >= 1000000) tickLabel = `Rp ${(tick / 1000000).toFixed(1)} jt`;
+      else if (tick >= 1000) tickLabel = `Rp ${Math.round(tick / 1000)} rb`;
+      else tickLabel = `Rp ${tick}`;
+    }
+    ctx.fillText(tickLabel, 10, y + 4);
   });
 
   ctx.setLineDash([]);
@@ -730,9 +797,9 @@ window.addEventListener("hashchange", () => {
 window.addEventListener("load", async () => {
   let savedUser = null;
   try {
-    savedUser = JSON.parse(localStorage.getItem(USER_KEY) || "null");
+    savedUser = JSON.parse(sessionStorage.getItem(USER_KEY) || "null");
   } catch (error) {
-    localStorage.removeItem(USER_KEY);
+    sessionStorage.removeItem(USER_KEY);
   }
 
   if (!savedUser?.isAdmin) {

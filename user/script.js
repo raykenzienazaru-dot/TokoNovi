@@ -4,8 +4,8 @@ const CONFIG = {
   ADMIN_EMAILS: [],
   ...(window.APP_CONFIG || {}),
 };
-
-const USER_KEY = "tokoku_user_v2";
+// Use the same key as login.js for consistency
+const USER_KEY = "currentUser";
 const hasSupabaseConfig = CONFIG.SUPABASE_URL
   && CONFIG.SUPABASE_ANON_KEY
   && !CONFIG.SUPABASE_URL.startsWith("ISI_")
@@ -181,7 +181,7 @@ const App = {
   },
 
   async signOut() {
-    localStorage.removeItem(USER_KEY);
+    sessionStorage.removeItem(USER_KEY);
     state.user = null;
     state.cart = [];
     state.orders = [];
@@ -522,6 +522,12 @@ const App = {
     if (!phone) return toast("Nomor WhatsApp wajib diisi", "error");
     if (!address) return toast("Alamat pengiriman wajib diisi", "error");
     if (!state.paymentProofFile) return toast("Upload bukti transfer terlebih dahulu", "error");
+    
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+    const fileExt = state.paymentProofFile.name.split('.').pop().toLowerCase();
+    if (!allowedExtensions.includes(fileExt)) {
+      return toast("Format file tidak didukung (Gunakan JPG/PNG/WebP)", "error");
+    }
     if (!db) return toast("Koneksi database belum siap", "error");
 
     const button = document.getElementById("submit-order-btn");
