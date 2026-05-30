@@ -5,7 +5,7 @@ const CONFIG = {
   ...(window.APP_CONFIG || {}),
 };
 
-const USER_KEY = 'tokoku_user_v2';
+const USER_KEY = 'currentUser';
 const USER_APP_URL = '../user/index.html';
 const ADMIN_APP_URL = '../admin/index.html';
 
@@ -25,9 +25,9 @@ const db = window.supabase && hasSupabaseConfig
 
 function getUserFromStorage() {
   try {
-    return JSON.parse(localStorage.getItem(USER_KEY));
+    return JSON.parse(sessionStorage.getItem(USER_KEY));
   } catch (error) {
-    localStorage.removeItem(USER_KEY);
+    sessionStorage.removeItem(USER_KEY);
     return null;
   }
 }
@@ -124,7 +124,7 @@ async function loginEmail(event) {
     }
 
     const user = buildUser(account);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
     window.location.href = getAppUrl(user);
   } catch (error) {
     setError('login-error', 'Login gagal: ' + error.message);
@@ -208,7 +208,7 @@ async function registerUser(event) {
 
     // Auto-login after successful registration
     const user = buildUser(account);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
     window.location.href = getAppUrl(user);
   } catch (error) {
     setError('register-error', 'Pendaftaran gagal: ' + error.message);
