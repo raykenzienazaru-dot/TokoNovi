@@ -128,7 +128,7 @@ const App = {
     refreshIcons();
 
     try {
-      const saved = localStorage.getItem(USER_KEY);
+      const saved = sessionStorage.getItem(USER_KEY);
       if (saved) {
         state.user = JSON.parse(saved);
         this.applyLogin();
@@ -139,7 +139,7 @@ const App = {
         this.showAuth();
       }
     } catch (error) {
-      localStorage.removeItem(USER_KEY);
+      sessionStorage.removeItem(USER_KEY);
       this.showAuth();
     } finally {
       const loader = document.getElementById("app-loader");

@@ -232,35 +232,55 @@ create policy "public read active approved products"
 on public.products for select
 using (is_active = true and approval_status = 'approved');
 
-drop policy if exists "anon manage products for simple app" on public.products;
-create policy "anon manage products for simple app"
+-- Hanya Admin yang bisa mengelola produk
+drop policy if exists "admin manage products" on public.products;
+create policy "admin manage products"
 on public.products for all
-using (true)
-with check (true);
+to authenticated
+using (exists (select 1 from app_users where email = auth.jwt()->>'email' and is_admin = true));
 
 drop policy if exists "public read active discounts" on public.discounts;
 create policy "public read active discounts"
 on public.discounts for select
 using (is_active = true);
 
-drop policy if exists "anon manage discounts for simple app" on public.discounts;
-create policy "anon manage discounts for simple app"
+-- Hanya Admin yang bisa mengelola diskon
+drop policy if exists "admin manage discounts" on public.discounts;
+create policy "admin manage discounts"
 on public.discounts for all
-using (true)
-with check (true);
+to authenticated
+using (exists (select 1 from app_users where email = auth.jwt()->>'email' and is_admin = true));
 
-drop policy if exists "anon manage orders for simple app" on public.orders;
-create policy "anon manage orders for simple app"
-on public.orders for all
-using (true)
-with check (true);
+-- User hanya bisa melihat pesanan miliknya sendiri, Admin bisa lihat semua
+drop policy if exists "users see own orders" on public.orders;
+create policy "users see own orders"
+on public.orders for select
+to authenticated
+using (
+  customer_email = auth.jwt()->>'email' 
+  or 
+  exists (select 1 from app_users where email = auth.jwt()->>'email' and is_admin = true)
+);
 
-drop policy if exists "anon manage order items for simple app" on public.order_items;
-create policy "anon manage order items for simple app"
-on public.order_items for all
-using (true)
-with check (true);
+-- Izinkan insert pesanan untuk user yang login
+drop policy if exists "users insert own orders" on public.orders;
+create policy "users insert own orders"
+on public.orders for insert
+to authenticated
+with check (customer_email = auth.jwt()->>'email');
 
+-- Order Items mengikuti akses Orders
+drop policy if exists "users see own order items" on public.order_items;
+create policy "users see own order items"
+on public.order_items for select
+to authenticated
+using (
+  exists (
+    select 1 from orders 
+    where orders.id = order_items.order_id 
+    and (orders.customer_email = auth.jwt()->>'email' or exists (select 1 from app_users where email = auth.jwt()->>'email' and is_admin = true))
+  )
+);
 insert into public.products (name, category, description, price, stock, image_url)
 values
   ('Kaos Oversize Basic', 'fashion', 'Bahan katun nyaman untuk harian.', 89000, 24, null),
