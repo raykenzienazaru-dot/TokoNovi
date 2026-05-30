@@ -236,10 +236,13 @@ function setupPasswordToggle(inputId, toggleId) {
 /* ===== INIT ===== */
 document.addEventListener('DOMContentLoaded', () => {
   const savedUser = getUserFromStorage();
-  if (savedUser) {
+  // Only redirect if savedUser is valid (has email and role)
+  if (savedUser && savedUser.email && savedUser.role) {
     window.location.href = getAppUrl(savedUser);
     return;
   }
+  // Clear any invalid/corrupt session data to prevent loops
+  sessionStorage.removeItem(USER_KEY);
 
   // Tab switching
   document.getElementById('tab-login').addEventListener('click', () => switchTab('login'));

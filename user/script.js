@@ -130,11 +130,19 @@ const App = {
     try {
       const saved = sessionStorage.getItem(USER_KEY);
       if (saved) {
-        state.user = JSON.parse(saved);
-        this.applyLogin();
-        await this.loadProducts();
-        await this.loadUserOrders();
-        this.navigate("store", false);
+        const parsed = JSON.parse(saved);
+        // Validate user data before proceeding
+        if (parsed && parsed.email && parsed.role) {
+          state.user = parsed;
+          this.applyLogin();
+          await this.loadProducts();
+          await this.loadUserOrders();
+          this.navigate("store", false);
+        } else {
+          // Invalid data, clear it and redirect
+          sessionStorage.removeItem(USER_KEY);
+          this.showAuth();
+        }
       } else {
         this.showAuth();
       }
@@ -151,7 +159,12 @@ const App = {
   },
 
   showAuth() {
-    window.location.href = "../login/index.html";
+    // Prevent redirect loop: only redirect if not already redirecting
+    if (!window._redirecting) {
+      window._redirecting = true;
+      sessionStorage.removeItem(USER_KEY);
+      window.location.href = "../login/index.html";
+    }
   },
 
   async loginEmail() {

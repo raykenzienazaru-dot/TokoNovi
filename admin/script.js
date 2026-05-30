@@ -799,10 +799,14 @@ window.addEventListener("load", async () => {
   try {
     savedUser = JSON.parse(sessionStorage.getItem(USER_KEY) || "null");
   } catch (error) {
+    // Corrupt data, clear it
     sessionStorage.removeItem(USER_KEY);
   }
 
-  if (savedUser?.role !== 'admin') {
+  // Validate user data has required fields and is admin
+  if (!savedUser || !savedUser.email || !savedUser.role || savedUser.role !== 'admin') {
+    // Clear any invalid session data to prevent redirect loops
+    sessionStorage.removeItem(USER_KEY);
     window.location.href = "../login/index.html";
     return;
   }
