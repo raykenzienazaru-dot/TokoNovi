@@ -355,3 +355,35 @@ drop trigger if exists trg_reduce_stock_on_order_insert on public.order_items;
 create trigger trg_reduce_stock_on_order_insert
 after insert on public.order_items
 for each row execute function public.reduce_stock_on_order_insert();
+
+-- ============================================================
+-- Trigger: Kembalikan Stok Saat Pesanan Ditolak atau Dibatalkan
+-- ============================================================
+create or replace function public.restore_stock_on_order_status_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  -- Periksa jika status berubah menjadi 'rejected' atau 'cancelled'
+  -- DAN status sebelumnya bukan 'rejected' atau 'cancelled' (untuk mencegah double restore)
+  if (new.status in ('rejected', 'cancelled')) and (old.status not in ('rejected', 'cancelled')) then
+    update public.products p
+    set stock = p.stock + oi.quantity
+    from public.order_items oi
+    where oi.order_id = new.id
+      and oi.product_id = p.id;
+  end if;
+
+  return new;
+end;
+$$;
+
+-- Hapus trigger lama jika ada untuk menghindari duplikasi
+drop trigger if exists trg_restore_stock_on_order_status_change on public.orders;
+
+-- Buat trigger baru pada tabel orders
+create trigger trg_restore_stock_on_order_status_change
+after update on public.orders
+for each row execute function public.restore_stock_on_order_status_change();
