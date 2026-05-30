@@ -48,8 +48,7 @@ create table if not exists public.discounts (
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
   order_number text not null unique,
-  status text not null default 'pending'
-    check (status in ('pending', 'processing', 'shipped', 'completed', 'rejected', 'cancelled', 'paid')),
+  status text not null default 'pending',
   total_amount numeric(12, 2) not null default 0 check (total_amount >= 0),
   customer_name text not null,
   customer_email text not null,
@@ -62,6 +61,11 @@ create table if not exists public.orders (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Memastikan check constraint untuk status terupdate
+alter table public.orders drop constraint if exists orders_status_check;
+alter table public.orders add constraint orders_status_check 
+  check (status in ('pending', 'processing', 'shipped', 'completed', 'rejected', 'cancelled', 'paid'));
 
 create table if not exists public.order_items (
   id uuid primary key default gen_random_uuid(),
