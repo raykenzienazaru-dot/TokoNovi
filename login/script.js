@@ -59,29 +59,34 @@ function switchTab(tabName) {
   const tabRegister = document.getElementById('tab-register');
   const panelLogin = document.getElementById('panel-login');
   const panelRegister = document.getElementById('panel-register');
+  const panelForgot = document.getElementById('panel-forgot');
   const indicator = document.getElementById('tab-indicator');
 
+  // Reset all states
+  [panelLogin, panelRegister, panelForgot].forEach(p => p?.classList.remove('active'));
+  [tabLogin, tabRegister].forEach(t => {
+    t?.classList.remove('active');
+    t?.setAttribute('aria-selected', 'false');
+  });
+
   if (tabName === 'login') {
-    tabLogin.classList.add('active');
-    tabLogin.setAttribute('aria-selected', 'true');
-    tabRegister.classList.remove('active');
-    tabRegister.setAttribute('aria-selected', 'false');
-    panelLogin.classList.add('active');
-    panelRegister.classList.remove('active');
+    tabLogin?.classList.add('active');
+    tabLogin?.setAttribute('aria-selected', 'true');
+    panelLogin?.classList.add('active');
     if (indicator) indicator.style.transform = 'translateX(0)';
-  } else {
-    tabRegister.classList.add('active');
-    tabRegister.setAttribute('aria-selected', 'true');
-    tabLogin.classList.remove('active');
-    tabLogin.setAttribute('aria-selected', 'false');
-    panelRegister.classList.add('active');
-    panelLogin.classList.remove('active');
+  } else if (tabName === 'register') {
+    tabRegister?.classList.add('active');
+    tabRegister?.setAttribute('aria-selected', 'true');
+    panelRegister?.classList.add('active');
     if (indicator) indicator.style.transform = 'translateX(100%)';
+  } else if (tabName === 'forgot') {
+    panelForgot?.classList.add('active');
   }
 
   // Clear errors
   setError('login-error', '');
   setError('register-error', '');
+  setError('forgot-error', '');
 }
 
 /* ===== LOGIN ===== */
@@ -220,6 +225,61 @@ async function registerUser(event) {
   }
 }
 
+/* ===== RESET PASSWORD ===== */
+async function resetPassword(event) {
+  event.preventDefault();
+
+  const email = document.getElementById('forgot-email-input').value.trim().toLowerCase();
+  const name = document.getElementById('forgot-name-input').value.trim();
+  const newPassword = document.getElementById('forgot-password-input').value;
+  const confirm = document.getElementById('forgot-confirm-input').value;
+  const btn = document.getElementById('forgot-btn');
+
+  if (!email || !name || !newPassword) {
+    setError('forgot-error', 'Semua data wajib diisi');
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    setError('forgot-error', 'Password baru minimal 6 karakter');
+    return;
+  }
+
+  if (newPassword !== confirm) {
+    setError('forgot-error', 'Konfirmasi password tidak cocok');
+    return;
+  }
+
+  setError('forgot-error', '');
+  btn.disabled = true;
+  btn.textContent = 'Memproses...';
+
+  try {
+    if (!db) throw new Error('Database tidak terhubung');
+
+    const { data, error } = await db.rpc('reset_app_user_password', {
+      input_email: email,
+      input_name: name,
+      input_new_password: newPassword,
+    });
+
+    if (error) throw error;
+
+    if (data === true) {
+      alert('Password berhasil diubah! Silakan login kembali.');
+      switchTab('login');
+    } else {
+      setError('forgot-error', 'Email atau Nama tidak cocok dengan data kami');
+    }
+  } catch (error) {
+    console.error(error);
+    setError('forgot-error', 'Gagal reset password: ' + error.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Reset Password';
+  }
+}
+
 /* ===== PASSWORD TOGGLE ===== */
 function setupPasswordToggle(inputId, toggleId) {
   const input = document.getElementById(inputId);
@@ -249,6 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('tab-register').addEventListener('click', () => switchTab('register'));
   document.getElementById('go-to-register')?.addEventListener('click', () => switchTab('register'));
   document.getElementById('go-to-login')?.addEventListener('click', () => switchTab('login'));
+  document.getElementById('go-to-forgot')?.addEventListener('click', () => switchTab('forgot'));
 
   // Login form
   document.getElementById('login-form').addEventListener('submit', loginEmail);
@@ -262,10 +323,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('reg-password-input').addEventListener('input', () => setError('register-error', ''));
   document.getElementById('reg-confirm-input').addEventListener('input', () => setError('register-error', ''));
 
+  // Forgot form
+  document.getElementById('forgot-form')?.addEventListener('submit', resetPassword);
+
   // Password toggles
   setupPasswordToggle('password-input', 'password-toggle');
   setupPasswordToggle('reg-password-input', 'reg-password-toggle');
   setupPasswordToggle('reg-confirm-input', 'reg-confirm-toggle');
-
+  setupPasswordToggle('forgot-password-input', 'forgot-password-toggle');
+  setupPasswordToggle('forgot-confirm-input', 'forgot-confirm-toggle');
 
 });

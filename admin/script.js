@@ -367,7 +367,7 @@ function renderApprovals() {
 
   // Filter products based on state.approvalFilter
   const filteredProducts = state.products.filter(product => {
-    const currentStatus = product.approval_status || "pending"; // Default to 'pending' if not set
+    const currentStatus = (product.approval_status || "pending").toLowerCase();
     if (state.approvalFilter === "all") return true;
     return currentStatus === state.approvalFilter;
   });
