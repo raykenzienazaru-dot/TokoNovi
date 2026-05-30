@@ -22,6 +22,7 @@ const db = window.supabase && hasSupabaseConfig
 const state = {
   products: [],
   orders: [],
+  orderFilter: "all",
   paymentFilter: "all",
 };
 
@@ -260,12 +261,17 @@ function renderOrders() {
   const rows = document.getElementById("orderRows");
   if (!rows) return;
 
-  if (!state.orders.length) {
-    rows.innerHTML = `<tr><td colspan="7">Belum ada pesanan.</td></tr>`;
+  const filteredOrders = state.orders.filter(order => {
+    if (state.orderFilter === "all") return true;
+    return order.status === state.orderFilter;
+  });
+
+  if (!filteredOrders.length) {
+    rows.innerHTML = `<tr><td colspan="7" class="empty-state" style="text-align: center; padding: 2rem; color: #8a95a6;">Belum ada pesanan dalam status ini.</td></tr>`;
     return;
   }
 
-  rows.innerHTML = state.orders.map((order, index) => `
+  rows.innerHTML = filteredOrders.map((order, index) => `
     <tr>
       <td>${index + 1}</td>
       <td>${escapeHtml(order.order_number)}</td>
@@ -512,6 +518,16 @@ document.querySelectorAll("[data-tabs] button").forEach((tab) => {
       item.classList.toggle("active", item === tab);
     });
     renderPayments();
+  });
+});
+
+document.querySelectorAll("[data-tabs-pesanan] button").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    state.orderFilter = tab.dataset.filter;
+    document.querySelectorAll("[data-tabs-pesanan] button").forEach((item) => {
+      item.classList.toggle("active", item === tab);
+    });
+    renderOrders();
   });
 });
 

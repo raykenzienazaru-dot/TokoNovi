@@ -213,7 +213,15 @@
     </section>
 
     <section class="page" id="page-pesanan">
-      <div class="page-head"><h1>Pesanan</h1></div>
+      <div class="page-head compact"><h1>Pesanan</h1></div>
+      <div class="tabs" data-tabs-pesanan>
+        <button class="active" data-filter="all">Semua</button>
+        <button data-filter="pending">Menunggu Konfirmasi</button>
+        <button data-filter="paid">Dibayar</button>
+        <button data-filter="processing">Sedang Diproses</button>
+        <button data-filter="completed">Selesai</button>
+        <button data-filter="rejected">Ditolak</button>
+      </div>
       <section class="panel table-panel">
         <table>
           <thead><tr><th>No</th><th>Kode Pesanan</th><th>Pelanggan</th><th>Total</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead>
