@@ -103,7 +103,7 @@ function requireDb() {
 
 function updateRealTimeDate() {
   const dateElement = document.getElementById("currentDateDisplay"); // Pastikan ID ini ada di HTML
-  if (dateElement) {
+  if (dateElement && state.orders.length > 0) {
     const now = new Date();
     dateElement.textContent = now.toLocaleString("id-ID", { 
       weekday: 'long', 
@@ -116,17 +116,24 @@ function updateRealTimeDate() {
     });
   }
 
-  // Update dropdown rentang tanggal jika masih default
+  // Update dropdown rentang tanggal agar dinamis
   const rangeSelect = document.getElementById("dateRangeSelect");
-  if (rangeSelect && (rangeSelect.options.length === 0 || rangeSelect.options[0].text === "Memuat rentang tanggal...")) {
+  if (rangeSelect && (rangeSelect.options.length <= 1 || rangeSelect.options[0].text.includes("Memuat"))) {
     const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const firstDayCurrent = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDayCurrent = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     
-    const startStr = firstDay.toLocaleDateString("id-ID", { day: '2-digit', month: 'short', year: 'numeric' });
-    const endStr = lastDay.toLocaleDateString("id-ID", { day: '2-digit', month: 'short', year: 'numeric' });
-    rangeSelect.innerHTML = `<option>${startStr} - ${endStr}</option>`;
+    const firstDayPrev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastDayPrev = new Date(now.getFullYear(), now.getMonth(), 0);
+    
+    const fmtRange = (s, e) => `${s.toLocaleDateString("id-ID", { day: '2-digit', month: 'short' })} - ${e.toLocaleDateString("id-ID", { day: '2-digit', month: 'short', year: 'numeric' })}`;
+
+    rangeSelect.innerHTML = `
+      <option value="current">${fmtRange(firstDayCurrent, lastDayCurrent)}</option>
+      <option value="prev">${fmtRange(firstDayPrev, lastDayPrev)}</option>
+    `;
   }
+  refreshIcons();
 
   setText("reportDate", new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" }));
 }
@@ -789,6 +796,20 @@ function drawSalesChart() {
       else tickLabel = `Rp ${tick}`;
     }
     ctx.fillText(tickLabel, 10, y + 4);
+  });
+
+  // Gambar Label Tanggal di Sumbu X (Setiap 7 hari agar tidak menumpuk)
+  ctx.setLineDash([]);
+  ctx.textAlign = "center";
+  const labelIndices = [0, 7, 14, 21, 29];
+  labelIndices.forEach((idx) => {
+    const x = pad.left + (idx / (values.length - 1)) * chartW;
+    const labelDate = new Date(now);
+    labelDate.setDate(now.getDate() - (29 - idx));
+    
+    const dateStr = labelDate.toLocaleDateString("id-ID", { day: '2-digit', month: 'short' });
+    ctx.fillStyle = "#8a95a6";
+    ctx.fillText(dateStr, x, height - 10);
   });
 
   ctx.setLineDash([]);
