@@ -802,7 +802,7 @@ window.addEventListener("load", async () => {
     sessionStorage.removeItem(USER_KEY);
   }
 
-  if (!savedUser?.isAdmin) {
+  if (savedUser?.role !== 'admin') {
     window.location.href = "../login/index.html";
     return;
   }
