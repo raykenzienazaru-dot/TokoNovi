@@ -49,7 +49,7 @@ create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
   order_number text not null unique,
   status text not null default 'pending'
-    check (status in ('pending', 'processing', 'completed', 'rejected', 'cancelled', 'paid')),
+    check (status in ('pending', 'processing', 'shipped', 'completed', 'rejected', 'cancelled', 'paid')),
   total_amount numeric(12, 2) not null default 0 check (total_amount >= 0),
   customer_name text not null,
   customer_email text not null,
@@ -204,8 +204,9 @@ begin
   update public.app_users
   set password_hash = extensions.crypt(input_new_password, extensions.gen_salt('bf')),
       updated_at = now()
-  where lower(email) = lower(trim(input_email))
-    and lower(display_name) = lower(trim(input_name));
+  where lower(trim(email)) = lower(trim(input_email))
+    and lower(trim(display_name)) = lower(trim(input_name))
+    and is_active = true;
 
   if found then
     return true;
@@ -321,3 +322,34 @@ drop policy if exists "public upload payment proofs" on storage.objects;
 create policy "public upload payment proofs"
 on storage.objects for insert
 with check (bucket_id = 'payment-proofs');
+
+-- ============================================================
+-- Trigger: Kurangi Stok Otomatis Saat Pesanan Selesai
+-- ============================================================
+create or replace function public.reduce_stock_on_order_completion()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  -- Hanya jalankan jika status berubah dari non-completed menjadi 'completed'
+  if old.status <> 'completed' and new.status = 'completed' then
+    -- Loop melalui setiap item dalam pesanan yang baru saja selesai
+    update public.products p
+    set stock = p.stock - oi.quantity
+    from public.order_items oi
+    where oi.order_id = new.id
+      and p.id = oi.product_id
+      and p.stock >= oi.quantity; -- Pastikan stok tidak menjadi negatif
+
+    -- Opsional: Tambahkan penanganan error atau log jika stok tidak mencukupi
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_reduce_stock_on_order_completion on public.orders;
+create trigger trg_reduce_stock_on_order_completion
+before update on public.orders
+for each row execute function public.reduce_stock_on_order_completion();

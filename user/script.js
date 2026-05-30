@@ -134,7 +134,7 @@ const App = {
       if (saved) {
         const parsed = JSON.parse(saved);
         // Validate user data before proceeding
-        if (parsed && parsed.email && parsed.role) {
+        if (parsed && (parsed.email || parsed.username) && parsed.role) {
           state.user = parsed;
           this.applyLogin();
           await this.loadProducts();
@@ -176,7 +176,7 @@ const App = {
   applyLogin() {
     if (!state.user) return;
 
-    const name = state.user.email.split("@")[0];
+    const name = state.user.displayName || state.user.username || "User";
     const initial = name[0]?.toUpperCase() || "U";
 
     document.getElementById("page-auth")?.classList.remove("active");
@@ -186,7 +186,7 @@ const App = {
     this.setText("nav-name", name);
     this.setText("mobile-avatar", initial);
     this.setText("mobile-user-name", name);
-    this.setText("account-email", state.user.email);
+    this.setText("account-email", state.user.email || state.user.username);
     this.updateCartUI();
   },
 

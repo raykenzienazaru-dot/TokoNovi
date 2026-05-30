@@ -582,21 +582,8 @@ window.updateProductApproval = async function updateProductApproval(id, approval
 window.updateOrderStatus = async function updateOrderStatus(id, status) {
   if (!requireDb()) return;
   
-  // Jika status diubah ke 'completed', kurangi stok barang
-  if (status === 'completed') {
-    const order = state.orders.find(o => String(o.id) === String(id));
-    if (order && order.order_items) {
-      for (const item of order.order_items) {
-        // Ambil stok terbaru langsung dari DB untuk menghindari clash data lama
-        const { data: pData } = await db.from("products").select("stock").eq("id", item.product_id).single();
-        if (pData) {
-          const newStock = Math.max(0, Number(pData.stock || 0) - Number(item.quantity || 0));
-          await db.from("products").update({ stock: newStock }).eq("id", item.product_id);
-        }
-      }
-    }
-  }
-
+  // Catatan: Pengurangan stok tidak perlu dilakukan manual di sini karena 
+  // sudah ditangani secara otomatis oleh trigger 'trg_reduce_stock_on_order_completion' di database.
   const { error } = await db.from("orders").update({ status }).eq("id", id);
   if (error) return showToast("Gagal mengubah status pesanan");
   showToast("Status pesanan menjadi " + statusLabel(status));
