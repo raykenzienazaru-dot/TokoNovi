@@ -105,8 +105,29 @@ function updateRealTimeDate() {
   const dateElement = document.getElementById("currentDateDisplay"); // Pastikan ID ini ada di HTML
   if (dateElement) {
     const now = new Date();
-    dateElement.textContent = now.toLocaleDateString("id-ID", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    dateElement.textContent = now.toLocaleString("id-ID", { 
+      weekday: 'long', 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
   }
+
+  // Update dropdown rentang tanggal jika masih default
+  const rangeSelect = document.getElementById("dateRangeSelect");
+  if (rangeSelect && (rangeSelect.options.length === 0 || rangeSelect.options[0].text === "Memuat rentang tanggal...")) {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    const startStr = firstDay.toLocaleDateString("id-ID", { day: '2-digit', month: 'short', year: 'numeric' });
+    const endStr = lastDay.toLocaleDateString("id-ID", { day: '2-digit', month: 'short', year: 'numeric' });
+    rangeSelect.innerHTML = `<option>${startStr} - ${endStr}</option>`;
+  }
+
   setText("reportDate", new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" }));
 }
 
@@ -813,4 +834,7 @@ window.addEventListener("load", async () => {
   refreshIcons();
   showPage(location.hash.slice(1) || "dashboard", false);
   await loadAll();
+  
+  // Jalankan interval agar waktu terus berjalan (Real-time)
+  setInterval(updateRealTimeDate, 1000);
 });
