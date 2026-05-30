@@ -39,11 +39,13 @@ function setError(id, message) {
 
 function buildUser(account) {
   const email = account.email.toLowerCase();
+  const isAdmin = Boolean(account.is_admin) || CONFIG.ADMIN_EMAILS.includes(email);
   return {
     email,
     id: account.id || 'u_' + btoa(email).replace(/=/g, ''),
     name: account.display_name || email.split('@')[0],
-    isAdmin: Boolean(account.is_admin) || CONFIG.ADMIN_EMAILS.includes(email),
+    isAdmin: isAdmin,
+    role: isAdmin ? 'admin' : 'user'
   };
 }
 
